@@ -1,0 +1,17 @@
+spring:
+    application:
+        name: vehicle-rental-2306203236-be
+
+    mvc:
+        hiddenmethod:
+            filter:
+                enabled: true
+    
+    profiles:
+        active: 'dev'
+
+    jpa:
+        hibernate:
+            ddl-auto: create-drop
+
+

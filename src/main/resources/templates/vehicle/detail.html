@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Vehicle Details</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 30px; background-color: #f9f9f9; }
+        .container { max-width: 700px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #009879; }
+        .info-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; }
+        .buttons { text-align: center; margin-top: 20px; }
+        button { background-color: #009879; color: white; border: none; padding: 10px 20px; border-radius: 6px; margin: 5px; cursor: pointer; }
+        .delete { background-color: #e63946; }
+        button:hover { opacity: 0.9; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Vehicle Details</h2>
+        <div class="info-row"><b>ID:</b> <span th:text="${vehicle.id}"></span></div>
+        <div class="info-row"><b>Vendor:</b> <span th:text="${vehicle.rentalVendor.name}"></span></div>
+        <div class="info-row"><b>Type:</b> <span th:text="${vehicle.type}"></span></div>
+        <div class="info-row"><b>Brand:</b> <span th:text="${vehicle.brand}"></span></div>
+        <div class="info-row"><b>Model:</b> <span th:text="${vehicle.model}"></span></div>
+        <div class="info-row"><b>Year:</b> <span th:text="${vehicle.productionYear}"></span></div>
+        <div class="info-row"><b>Location:</b> <span th:text="${vehicle.location}"></span></div>
+        <div class="info-row"><b>License Plate:</b> <span th:text="${vehicle.licensePlate}"></span></div>
+        <div class="info-row"><b>Capacity:</b> <span th:text="${vehicle.capacity}"></span></div>
+        <div class="info-row"><b>Transmission:</b> <span th:text="${vehicle.transmission}"></span></div>
+        <div class="info-row"><b>Fuel Type:</b> <span th:text="${vehicle.fuelType}"></span></div>
+        <div class="info-row"><b>Price/Day:</b> Rp <span th:text="${vehicle.price}"></span></div>
+        <div class="info-row"><b>Status:</b> <span th:text="${vehicle.status}"></span></div>
+
+        <div class="buttons">
+            <a th:href="@{'/vehicles/update/' + ${vehicle.id}}"><button>Update Vehicle Details</button></a>
+            <a th:href="@{'/vehicles/' + ${vehicle.id} + '/delete'}"
+            onclick="return confirm('Are you sure you want to delete this vehicle?');">
+            <button class="delete">Delete Vehicle</button>
+            </a>
+            <a href="/vehicles"><button>Back</button></a>
+        </div>
+    </div>
+</body>
+</html>

@@ -161,7 +161,6 @@
         <option th:value="Automatic">Automatic</option>
     </select>
 
-    <!-- Fuel Type -->
     <label>Fuel Type</label>
     <select th:field="*{fuelType}">
         <option value="">-- Select Fuel Type --</option>
@@ -171,11 +170,9 @@
         <option th:value="Listrik">Listrik</option>
     </select>
 
-    <!-- Price -->
     <label>Price per Day</label>
     <input type="number" th:field="*{price}" min="0">
 
-    <!-- Status (only for edit) -->
     <div th:if="${isEdit}">
         <label>Status</label>
         <select th:field="*{status}">

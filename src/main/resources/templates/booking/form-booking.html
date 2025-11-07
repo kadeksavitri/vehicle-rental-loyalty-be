@@ -11,7 +11,7 @@
         }
 
         nav {
-            background-color: #009879;
+            background-color: #1aa546;
             color: white;
             display: flex;
             justify-content: space-between;
@@ -46,13 +46,13 @@
         }
 
         h2 {
-            color: #009879;
-            margin-bottom: 15px;
+            color: #1aa546;
+            margin-bottom: 20px;
         }
 
         label {
             font-weight: bold;
-            color: #009879;
+            color: #1aa546;
             display: block;
             margin-bottom: 5px;
             margin-top: 15px;
@@ -89,14 +89,14 @@
         }
 
         .btn-success {
-            background-color: #009879;
+            background-color: #1aa546;
             color: white;
             width: 100%;
             margin-top: 15px;
         }
 
         .btn-success:hover {
-            background-color: #007f66;
+            background-color: #1aa546;
         }
 
         .btn-primary {
@@ -108,6 +108,9 @@
 
         .btn-primary:hover {
             background-color: #0056b3;
+        }
+        button, a, .btn {
+            text-decoration: none !important;
         }
 
         .vehicle-card {
@@ -122,13 +125,13 @@
 
         .vehicle-card:hover {
             background-color: #e8fbee;
-            border-color: #009879;
+            border-color: #1aa546;
         }
 
         .vehicle-card.alert {
             background-color: #e8fbee;
-            border: 1px solid #009879;
-            color: #009879;
+            border: 1px solid #1aa546;
+            color: #1aa546;
         }
 
         .price-section {
@@ -146,7 +149,7 @@
         }
 
         .highlight {
-            color: #009879;
+            color: #1aa546;
             font-weight: bold;
         }
 
@@ -159,32 +162,23 @@
 </head>
 
 <body>
-    <nav>
-        <div><b>Vehicle Rental App</b></div>
-        <div>
-            <a href="/">Home</a>
-            <a href="/vehicles">Vehicles</a>
-            <a href="/bookings">Bookings</a>
-        </div>
-    </nav>
 
-    <!-- 🧾 Form Create Booking -->
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
     <div class="container">
         <form th:action="${isEdit} ? @{'/bookings/update-details/search'} : @{/bookings/create}" 
               th:object="${rentalBooking}" method="post">    
             <h2 th:text="${isEdit} ? 'Update Rental Booking' : 'Create a New Rental Booking'"></h2>    
             <input type="hidden" name="_method" value="put" th:if="${isEdit}"/>
-           <!-- Hidden untuk CREATE -->
             <input type="hidden" th:if="${!isEdit}" th:field="*{vehicleId}" />
 
-            <!-- Hidden untuk UPDATE -->
             <input type="hidden" th:if="${isEdit}" th:field="*{id}" th:value="${rentalBooking.id}" />
             <input type="hidden" th:if="${isEdit}" th:field="*{vehicleId}" th:value="${rentalBooking.vehicleId}" />
 
 
             <div class="form-check">
                 <label>
-                    <input type="checkbox" th:field="*{includeDriver}" /> Include Driver?
+                    <input type="checkbox" th:field="*{includeDriver}" ;/> Include Driver?
                 </label>
             </div>
 
@@ -223,25 +217,24 @@
 
     <!-- Available Vehicles -->
     <div th:if="${availableVehicles != null and !#lists.isEmpty(availableVehicles)}">
-        <h4 style="margin-top:25px; color:#009879;">Available Vehicles</h4>
+        <h4 style="margin-top:25px; color:#1aa546;">Available Vehicles</h4>
 
         <div th:each="v : ${availableVehicles}" 
             class="vehicle-card" 
             th:attr="data-vehicle-id=${v.id}, data-price=${v.price}">
-            <p><strong th:text="${v.brand + ' (' + v.type + ')'}"></strong></p>
-            <p th:text="'Total Price: Rp ' + ${#numbers.formatDecimal(v.price, 0, 0)}"></p>
+            <p><strong th:text="${v.brand + ' ' + v.model + ' (' + v.type + ')'}"></strong></p>
+            <p th:text="'Total Price: Rp ' + ${#numbers.formatDecimal(v.price, 0, 'COMMA', 0, 'POINT')}"></p>
         </div>
 
-        <!-- Price Section -->
         <div class="price-section" id="priceSection">
             <p><strong>Booking Price Details</strong></p>
             <p>
-                Price per Day (<span class="highlight" th:text="${days + ' day(s)'}"></span>):
+                Price per Day (<span class="highlight" th:text="${days == 1 ? days + ' day' : days + ' days'}"></span>):
                 <span id="dynamicPrice">Rp 0</span>
             </p>
 
             <p id="driverFeeRow" style="display:none;">
-                Driver Service (<span class="highlight" th:text="${days + ' day(s)'}"></span>):
+                Driver Service (<span class="highlight" th:text="${days == 1 ? days + ' day' : days + ' days'}"></span>):
                 <span id="driverFee">Rp 0</span>
             </p>
 
@@ -252,9 +245,7 @@
             </p>
         </div>
 
-        <!-- FORM BUTTON BAGIAN BAWAH -->
         <div class="center" id="proceedForm">
-            <!-- Untuk CREATE → Proceed to Add-ons -->
             <form th:if="${!isEdit}" th:action="@{/bookings/create/addons}" th:object="${rentalBooking}" method="post">
                 <input type="hidden" id="selectedVehicleId" th:field="*{vehicleId}" />
                 <input type="hidden" th:field="*{pickUpTime}" />
@@ -267,7 +258,6 @@
                 <button type="submit" class="btn btn-primary">Proceed to Add-ons</button>
             </form>
 
-            <!-- Untuk UPDATE → Save Changes -->
             <form th:if="${isEdit}" th:action="@{/bookings/update-details}" th:object="${rentalBooking}" method="post">
                 <input type="hidden" name="_method" value="put" />
                 <input type="hidden" th:field="*{id}" th:value="${rentalBooking.id}" />
@@ -297,12 +287,12 @@
         const driverFee = document.querySelector("#driverFee");
 
         const includeDriverCheckbox = document.querySelector('input[name="includeDriver"]');
-        const days = /*[[${days}]]*/ 1; // Thymeleaf akan ganti angka hari
+        const days = /*[[${days}]]*/ 1; 
 
         let selectedVehiclePrice = 0;
 
         function updatePrice() {
-            const basePrice = selectedVehiclePrice * days;
+            const basePrice = selectedVehiclePrice;
             const driverPrice = includeDriverCheckbox.checked ? (days * 100000) : 0;
             const total = basePrice + driverPrice;
 
@@ -317,7 +307,6 @@
             }
         }
 
-        // klik kartu kendaraan
         cards.forEach(card => {
             card.addEventListener("click", function() {
             cards.forEach(c => c.classList.remove("alert"));
@@ -333,7 +322,6 @@
             });
         });
 
-        // ubah kalau toggle driver
         includeDriverCheckbox.addEventListener("change", updatePrice);
         });
 

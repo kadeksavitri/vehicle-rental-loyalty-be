@@ -10,107 +10,88 @@
             padding: 0;
         }
 
-        /* 🌿 Navbar */
-        nav {
-            background-color: #009879;
-            color: white;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 14px 40px;
-        }
-
-        nav b {
-            font-size: 20px;
-        }
-
-        nav a {
-            color: white;
-            text-decoration: none;
-            margin-left: 25px;
-            font-weight: bold;
-            transition: 0.3s;
-        }
-
-        nav a:hover {
-            text-decoration: underline;
-            opacity: 0.9;
-        }
-
-        /* 🧩 Layout */
         .container {
             width: 80%;
             margin: 40px auto;
-            background: white;
-            padding: 40px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.08);
-        }
-
-        h2 {
-            color: #009879;
-            margin-bottom: 20px;
-        }
-
-        /* 🎨 Buttons */
-        .btn {
-            border: none;
-            border-radius: 6px;
-            padding: 10px 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .btn-primary { background-color: #28a745; color: white; } /* hijau muda */
-        .btn-primary:hover { background-color: #218838; }
-
-        .btn-warning { background-color: #007bff; color: white; } /* biru */
-        .btn-warning:hover { background-color: #0069d9; }
-
-        .btn-info { background-color: #17a2b8; color: white; } /* biru muda */
-        .btn-info:hover { background-color: #138496; }
-
-        .btn-danger { background-color: #dc3545; color: white; } /* merah */
-        .btn-danger:hover { background-color: #b02a37; }
-
-        .btn-dark { background-color: #444; color: white; }
-        .btn-dark:hover { background-color: #222; }
-
-        .top-buttons {
-            text-align: right;
-            margin-bottom: 20px;
-        }
-
-        /* 🧾 Card Booking Details */
-        .booking-card {
             background: #fff;
-            border-radius: 10px;
-            box-shadow: 0 0 8px rgba(0,0,0,0.05);
-            padding: 25px 40px;
+            padding: 35px 45px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
         }
-
         .booking-header {
             display: flex;
-            align-items: center;
             justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 12px;
+            margin-bottom: 20px;
         }
 
         .booking-header h3 {
-            color: #333;
+            color: #222;
+            font-weight: bold;
+            font-size: 22px;
             margin: 0;
+        }
+
+        .top-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 6px;
+            padding: 10px 18px;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            color: white;
+            text-decoration: none;
+        }
+
+        .btn-green {
+            background-color: #1aa546;
+        }
+
+        .btn-green:hover {
+            background-color: #007d64;
+        }
+
+        .btn-blue {
+            background-color: #007bff;
+        }
+
+        .btn-blue:hover {
+            background-color: #0066d3;
+        }
+
+        .btn-navy {
+            background-color: #343a40;
+        }
+
+        .btn-navy:hover {
+            background-color: #212529;
+        }
+
+        .btn-red {
+            background-color: #dc3545;
+        }
+
+        .btn-red:hover {
+            background-color: #b02a37;
         }
 
         .details-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 20px 60px;
+            gap: 25px 80px;
             margin-top: 25px;
         }
 
         .details-grid p {
             margin: 6px 0;
             font-size: 15px;
+            color: #333;
         }
 
         .details-grid strong {
@@ -119,40 +100,71 @@
 
         .highlight {
             font-weight: bold;
-            color: #009879;
+            color: #1aa546;
         }
 
-        /* Add-ons Section */
         .center {
-            text-align: center;
-            margin-top: 25px;
+            margin-top: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
         }
 
-        /* Modal (Bootstrap-like minimal) */
+        .btn-wide {
+            width: 100%;
+            text-align: center;
+            padding: 12px 0;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 15px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-dark {
+            background-color: #444;
+            color: white;
+        }
+
+        .btn-dark:hover {
+            background-color: #2f2f2f;
+        }
+
+        .btn-grey {
+            background-color: #808080;
+            color: white;
+        }
+
+        .btn-grey:hover {
+            background-color: #666;
+        }
+
         .modal {
             display: none;
             position: fixed;
             z-index: 100;
             padding-top: 100px;
-            left: 0; top: 0;
-            width: 100%; height: 100%;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
             overflow: auto;
-            background-color: rgba(0,0,0,0.4);
+            background-color: rgba(0, 0, 0, 0.4);
         }
 
         .modal-content {
             margin: auto;
             background-color: white;
-            padding: 20px;
-            border-radius: 8px;
+            padding: 25px 35px;
+            border-radius: 10px;
             width: 50%;
-            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
         }
 
         .close {
             color: #aaa;
             float: right;
-            font-size: 22px;
+            font-size: 24px;
             cursor: pointer;
         }
 
@@ -160,64 +172,71 @@
             color: #000;
         }
 
+        /* 📱 Responsif */
+        @media (max-width: 768px) {
+            .container {
+                width: 90%;
+                padding: 25px;
+            }
+
+            .details-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .top-buttons {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .btn {
+                width: 100%;
+                text-align: center;
+            }
+        }
     </style>
 </head>
 
 <body>
-    <!-- 🌿 Navbar -->
-    <nav>
-        <div><b>Vehicle Rental App</b></div>
-        <div>
-            <a href="/">Home</a>
-            <a href="/vehicles">Vehicles</a>
-            <a href="/bookings">Bookings</a>
-        </div>
-    </nav>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
 
-    <!-- 🧾 Booking Detail Card -->
     <div class="container">
-        <div class="booking-card">
-            <div class="booking-header">
-                <h3><strong>Booking Details</strong></h3>
+        <div class="booking-header">
+            <h3><strong>Booking Details</strong></h3>
 
-                <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+            <div class="top-buttons">
+                <a th:if="${canUpdateDetails}" th:href="@{'/bookings/' + ${rentalBooking.id} + '/update-details'}" class="btn btn-green">Update Booking Details</a>
+                <a th:if="${canUpdateAddOns}" th:href="@{'/bookings/' + ${rentalBooking.id} + '/update-addons'}" class="btn btn-blue">Update Add-Ons</a>
+                <a th:if="${canUpdateStatus}" th:href="@{'/bookings/' + ${rentalBooking.id} + '/update-status'}" class="btn btn-navy">Update Status</a>
+                <a th:if="${canCancel}" th:href="@{'/bookings/' + ${rentalBooking.id} + '/delete'}" class="btn btn-red">Cancel Booking</a>
+            </div>
+        </div>
 
-
-                <div class="top-buttons">
-                    <a th:if="${canUpdateDetails}" th:href="@{'/bookings/' + ${rentalBooking.id} + '/update-details'}" class="btn btn-primary">Update Booking Details</a>
-                    <a th:if="${canUpdateAddOns}" th:href="@{'/bookings/' + ${rentalBooking.id} + '/update-addons'}" class="btn btn-warning">Update Add-Ons</a>
-                    <a th:if="${canUpdateStatus}" th:href="@{'/bookings/' + ${rentalBooking.id} + '/update-status'}" class="btn btn-info">Update Status</a>
-                    <a th:if="${canCancel}" th:href="@{'/bookings/' + ${rentalBooking.id} + '/delete'}" class="btn btn-danger">Cancel Booking</a>
-                </div>
+        <div class="details-grid">
+            <div>
+                <p><strong>Booking ID</strong><br><span th:text="${rentalBooking.id}" class="highlight"></span></p>
+                <p><strong>Pick-up Time</strong><br><span th:text="${#temporals.format(rentalBooking.pickUpTime, 'MMMM dd, yyyy HH:mm')}" class="highlight"></span></p>
+                <p><strong>Pick-up Location</strong><br><span th:text="${rentalBooking.pickUpLocation}" class="highlight"></span></p>
+                <p><strong>Include Driver?</strong><br><span th:text="${rentalBooking.includeDriver ? 'Yes' : 'No'}"></span></p>
+                <p><strong>Total Price</strong><br><span th:text="'Rp ' + ${#numbers.formatDecimal(rentalBooking.totalPrice, 0, 'COMMA', 2, 'POINT')}" class="highlight"></span></p>
             </div>
 
-            <div class="details-grid">
-                <div>
-                    <p><strong>Booking ID</strong><br><span th:text="${rentalBooking.id}" class="highlight"></span></p>
-                    <p><strong>Pick-up Time</strong><br><span th:text="${#temporals.format(rentalBooking.pickUpTime, 'MMMM dd, yyyy HH:mm')}" class="highlight"></span></p>
-                    <p><strong>Pick-up Location</strong><br><span th:text="${rentalBooking.pickUpLocation}" class="highlight"></span></p>
-                    <p><strong>Include Driver?</strong><br><span th:text="${rentalBooking.includeDriver ? 'Yes' : 'No'}"></span></p>
-                    <p><strong>Total Price</strong><br><span th:text="'Rp ' + ${#numbers.formatDecimal(rentalBooking.totalPrice, 0, 'COMMA', 2, 'POINT')}" class="highlight"></span></p>
-                </div>
-
-                <div>
-                    <p><strong>Vehicle ID</strong><br>
-                        <a th:href="@{'/vehicles/' + ${rentalBooking.vehicle.id}}" th:text="${rentalBooking.vehicle.id}" class="highlight"></a>
-                    </p>
-                    <p><strong>Drop-off Time</strong><br><span th:text="${#temporals.format(rentalBooking.dropOffTime, 'MMMM dd, yyyy HH:mm')}" class="highlight"></span></p>
-                    <p><strong>Drop-off Location</strong><br><span th:text="${rentalBooking.dropOffLocation}" class="highlight"></span></p>
-                    <p><strong>Status</strong><br><span th:text="${rentalBooking.status}" class="highlight"></span></p>
-                </div>
+            <div>
+                <p><strong>Vehicle ID</strong><br>
+                    <a th:href="@{'/vehicles/' + ${rentalBooking.vehicle.id}}" th:text="${rentalBooking.vehicle.id}" class="highlight"></a>
+                </p>
+                <p><strong>Drop-off Time</strong><br><span th:text="${#temporals.format(rentalBooking.dropOffTime, 'MMMM dd, yyyy HH:mm')}" class="highlight"></span></p>
+                <p><strong>Drop-off Location</strong><br><span th:text="${rentalBooking.dropOffLocation}" class="highlight"></span></p>
+                <p><strong>Status</strong><br><span th:text="${rentalBooking.status}" class="highlight"></span></p>
             </div>
+        </div>
 
-            <div class="center">
-                <button onclick="document.getElementById('addonsModal').style.display='block'" class="btn btn-dark">View Add-Ons</button>
-                <a href="/bookings" class="btn btn-success" style="margin-left:10px;">Back</a>
-            </div>
+        <div class="center">
+            <button onclick="document.getElementById('addonsModal').style.display='block'" class="btn-wide btn-dark">View Add-Ons</button>
+            <a href="/bookings" class="btn-wide btn-grey">Back</a>
         </div>
     </div>
 
-    <!-- 💡 Add-Ons Modal -->
     <div id="addonsModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="document.getElementById('addonsModal').style.display='none'">&times;</span>
@@ -229,7 +248,6 @@
     </div>
 
     <script>
-        // Close modal if clicked outside
         window.onclick = function(event) {
             var modal = document.getElementById('addonsModal');
             if (event.target === modal) {

@@ -1,0 +1,27 @@
+<!-- templates/fragments/navbar.html -->
+<nav th:fragment="navbar" 
+     style="
+        background-color: white;
+        border-bottom: 1px solid #e0e0e0;
+        padding: 14px 40px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-family: Arial, sans-serif;
+">
+    <div style="font-weight: bold; font-size: 18px; color: #1aa546;">
+        <a href="/" style="text-decoration: none; color: #1aa546;">Vehicle Rental App</a>
+    </div>
+
+    <div>
+        <a href="/vehicles"
+           style="margin-right: 25px; text-decoration: none; color: #555; font-weight: 600; transition: 0.3s;"
+           onmouseover="this.style.color='#1aa546'"
+           onmouseout="this.style.color='#555'">Vehicles</a>
+
+        <a href="/bookings"
+           style="text-decoration: none; color: #555; font-weight: 600; transition: 0.3s;"
+           onmouseover="this.style.color='#1aa546'"
+           onmouseout="this.style.color='#555'">Bookings</a>
+    </div>
+</nav>

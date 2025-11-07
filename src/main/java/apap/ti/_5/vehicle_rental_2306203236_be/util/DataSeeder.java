@@ -107,10 +107,12 @@ public class DataSeeder {
         List<RentalAddOn> addOnList = new ArrayList<>();
 
         for (String name : addOnNames) {
-            double price = faker.number().randomDouble(2, 50000, 250000);
+            int price = faker.number().numberBetween(50000, 250000);
+            price = (price / 1000) * 1000; 
+
             RentalAddOn addOn = RentalAddOn.builder()
                     .name(name)
-                    .price(price)
+                    .price((double) price)
                     .createdAt(LocalDateTime.now())
                     .updatedAt(LocalDateTime.now())
                     .build();
@@ -121,4 +123,5 @@ public class DataSeeder {
         rentalAddOnRepository.saveAll(addOnList);
         System.out.println("Successfully seeded " + addOnList.size() + " RentalAddOns.");
     }
+
 }

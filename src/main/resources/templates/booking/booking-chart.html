@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Rental Booking Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f6f8fa;
+            margin: 0;
+        }
+        .container {
+            width: 800px;
+            height: auto;
+            margin: 40px auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
+        }
+        h1 {
+            text-align: center;
+            color: #1aa546;
+            margin-top: 30px;
+        }
+        select {
+            padding: 8px;
+            margin: 10px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+        .table-wrapper {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+        #summaryTable {
+
+            min-width: 700px; 
+            border-collapse: collapse;
+            table-layout: fixed; 
+            word-wrap: break-word;
+        }        
+        #summaryTable th, #summaryTable td {
+            border: 1px solid #ddd;
+            text-align: center;
+            padding: 8px;
+        }
+        #summaryTable th {
+            background-color: #1aa546;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+<div th:replace="fragments/navbar :: navbar"></div>
+
+    <h1>Rental Booking Dashboard</h1>
+
+    <div style="text-align:center; margin-bottom: -20px;">
+            <label>View By:</label>
+            <select id="periodSelect">
+                <option value="Monthly" th:selected="${period == 'Monthly'}">Monthly</option>
+                <option value="Quarterly" th:selected="${period == 'Quarterly'}">Quarterly</option>
+            </select>
+
+            <label>Year:</label>
+            <select id="yearSelect">
+                <option th:each="y : ${#numbers.sequence(2023, 2026)}"
+                        th:value="${y}" th:text="${y}" 
+                        th:selected="${year == y}"></option>
+            </select>
+        </div>
+
+    <div class="container">
+        
+
+
+        <canvas id="bookingChart" width="800" height="400"></canvas>
+
+        <div class="table-wrapper">
+        <table id="summaryTable">
+            <thead>
+                <tr id="summaryHeader"></tr>
+            </thead>
+            <tbody>
+                <tr id="summaryValues"></tr>
+            </tbody>
+        </table>
+        </div>
+
+    </div>
+
+    <script th:inline="javascript">
+    document.addEventListener("DOMContentLoaded", () => {
+      const ctx = document.getElementById("bookingChart").getContext("2d");
+      const periodSelect = document.getElementById("periodSelect");
+      const yearSelect = document.getElementById("yearSelect");
+      const summaryHeader = document.getElementById("summaryHeader");
+      const summaryValues = document.getElementById("summaryValues");
+
+      async function loadChart() {
+        const period = periodSelect.value;
+        const year = yearSelect.value;
+        const response = await fetch(`/bookings/api/chart?period=${period}&year=${year}`);
+        const data = await response.json();
+
+        const labels = data.map(item => item[0]);
+        const counts = data.map(item => Math.round(item[1])); // bulatkan nilai
+
+        // hancurkan chart lama kalau ada
+        if (window.bookingChart && typeof window.bookingChart.destroy === "function") {
+            window.bookingChart.destroy();
+        }
+
+        // buat chart baru
+        window.bookingChart = new Chart(ctx, {
+          type: "bar",
+          data: {
+            labels: labels,
+            datasets: [{
+              label: "Reservations",
+              data: counts,
+              backgroundColor: "#00c16e"
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: { position: "top" },
+              title: {
+                display: true,
+                text: `Booking Results (${period}) for ${year}`,
+                color: "#1aa546",
+                font: { size: 16, weight: "bold" }
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  // supaya bilangan bulat
+                  stepSize: 1,
+                  callback: function(value) {
+                    return Math.round(value);
+                  }
+                },
+                title: { display: true, text: "Number of Bookings" }
+              }
+            }
+          }
+        });
+
+        // update tabel ringkasan
+        summaryHeader.innerHTML = "";
+        summaryValues.innerHTML = "";
+
+        labels.forEach(label => {
+          const th = document.createElement("th");
+          th.textContent = label;
+          summaryHeader.appendChild(th);
+        });
+
+        counts.forEach(count => {
+          const td = document.createElement("td");
+          td.textContent = count;
+          summaryValues.appendChild(td);
+        });
+      }
+
+      periodSelect.addEventListener("change", loadChart);
+      yearSelect.addEventListener("change", loadChart);
+      loadChart();
+    });
+    </script>
+</body>
+</html>

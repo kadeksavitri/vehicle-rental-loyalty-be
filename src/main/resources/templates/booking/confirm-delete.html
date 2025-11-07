@@ -9,33 +9,6 @@
             margin: 0;
             padding: 0;
         }
-
-        nav {
-            background-color: #009879;
-            color: white;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 14px 40px;
-        }
-
-        nav b {
-            font-size: 20px;
-        }
-
-        nav a {
-            color: white;
-            text-decoration: none;
-            margin-left: 25px;
-            font-weight: bold;
-            transition: 0.3s;
-        }
-
-        nav a:hover {
-            text-decoration: underline;
-            opacity: 0.9;
-        }
-
         .container {
             background-color: #fff;
             width: 40%;
@@ -88,28 +61,21 @@
 
         .booking-id {
             font-weight: bold;
-            color: #009879;
+            color: #1aa546;
         }
     </style>
 </head>
 <body>
-    <nav>
-        <div><b>Vehicle Rental App</b></div>
-        <div>
-            <a href="/">Home</a>
-            <a href="/vehicles">Vehicles</a>
-            <a href="/bookings">Bookings</a>
-        </div>
-    </nav>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
 
     <div class="container">
         <h3>Batalkan Booking?</h3>
         <p>Apakah Anda yakin ingin membatalkan booking 
             <span class="booking-id" th:text="${booking.id}"></span>?<br>
-            Booking ini akan dihapus dan kendaraan akan kembali tersedia.
         </p>
 
         <form th:action="@{'/bookings/' + ${booking.id} + '/delete'}" method="post">
+            <input type="hidden" name="_method" value="delete">
             <button type="submit" class="btn btn-danger">Ya, Batalkan Booking</button>
             <a href="/bookings" class="btn btn-secondary">Kembali</a>
         </form>

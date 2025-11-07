@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -66,7 +67,7 @@ public class RentalBookingServiceImpl implements RentalBookingService {
     @Override
     public RentalBooking getRentalBooking(String id) {
 
-        return rentalBookingRepository.findById(id).orElse(null);
+        return rentalBookingRepository.findByIdAndDeletedAtIsNull(id).orElse(null);
     }
 
     @Override
@@ -178,6 +179,20 @@ public class RentalBookingServiceImpl implements RentalBookingService {
         Vehicle vehicle = booking.getVehicle();
         LocalDateTime now = LocalDateTime.now();
 
+        boolean hasOngoing = rentalBookingRepository
+            .findAllByVehicleAndDeletedAtIsNull(vehicle)
+            .stream()
+            .anyMatch(b -> "Ongoing".equals(b.getStatus()) && !b.getId().equals(booking.getId()));
+        if (hasOngoing) return null;
+
+        if ("Done".equals(booking.getStatus())) {
+            return null;
+        }
+
+        if ("Upcoming".equals(booking.getStatus()) && "Done".equals(newStatus)) {
+            return null;
+        }
+
         // Ubah dari Upcoming ke Ongoing
         if ("Upcoming".equals(booking.getStatus()) && "Ongoing".equals(newStatus)) {
             boolean isTimeValid = now.isAfter(booking.getPickUpTime()) && now.isBefore(booking.getDropOffTime());
@@ -203,10 +218,6 @@ public class RentalBookingServiceImpl implements RentalBookingService {
             booking.setTotalPrice(booking.getTotalPrice() + penalty);
             vehicle.setStatus("Available");
             vehicle.setLocation(booking.getDropOffLocation());
-        }
-
-        else if ("Done".equals(booking.getStatus())) {
-            return null;
         }
 
         booking.setUpdatedAt(LocalDateTime.now());
@@ -306,5 +317,46 @@ public class RentalBookingServiceImpl implements RentalBookingService {
         }
         return true;
     }
+
+    @Override
+    public List<Object[]> getBookingStatistics(String period, int year) {
+        List<RentalBooking> bookings = rentalBookingRepository.findAllByDeletedAtIsNull();
+
+        int[] counts;
+        String[] labels;
+
+        if ("Quarterly".equalsIgnoreCase(period)) {
+            counts = new int[4];
+            labels = new String[]{"Q1", "Q2", "Q3", "Q4"};
+
+            for (RentalBooking booking : bookings) {
+                if (booking.getCreatedAt().getYear() == year) {
+                    int month = booking.getCreatedAt().getMonthValue();
+                    int quarterIndex = (month - 1) / 3;
+                    counts[quarterIndex]++;
+                }
+            }
+        } else { // Monthly
+            counts = new int[12];
+            labels = new String[]{
+                "January", "February", "March", "April", "May", "June",
+                "July", "August", "September", "October", "November", "December"
+            };
+
+            for (RentalBooking booking : bookings) {
+                if (booking.getCreatedAt().getYear() == year) {
+                    int monthIndex = booking.getCreatedAt().getMonthValue() - 1;
+                    counts[monthIndex]++;
+                }
+            }
+        }
+
+        List<Object[]> result = new ArrayList<>();
+        for (int i = 0; i < labels.length; i++) {
+            result.add(new Object[]{labels[i], counts[i]});
+        }
+        return result;
+    }
+
 
 }

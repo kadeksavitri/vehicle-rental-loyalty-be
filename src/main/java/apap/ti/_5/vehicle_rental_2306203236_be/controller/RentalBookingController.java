@@ -170,23 +170,27 @@ public class RentalBookingController {
                 return "booking/form-booking";
             }
 
-            model.addAttribute("availableVehicles", availableVehicles);
-            model.addAttribute("rentalBooking", dto);
-            model.addAttribute("locations", locationService.getAllProvinces());
 
-            // Hitung durasi hari & harga total kendaraan yang dipilih 
             long days = Math.max(1, (long) Math.ceil((double) java.time.Duration.between(dto.getPickUpTime(), dto.getDropOffTime()).toHours() / 24));
-            double pricePerDay = availableVehicles.isEmpty() ? 0 : availableVehicles.get(0).getPrice();
-            double totalPrice = pricePerDay * days;
+
+            List<Vehicle> updatedVehicles = availableVehicles.stream()
+                    .peek(v -> {
+                        double base = v.getPrice() * days;
+                        v.setPrice(base); 
+                    })
+                    .sorted((v1, v2) -> Double.compare(v1.getPrice(), v2.getPrice())) 
+                    .toList();
 
             if (!availableVehicles.isEmpty()) {
                 model.addAttribute("showPriceSection", true);
             }
 
+            model.addAttribute("availableVehicles", updatedVehicles);
+            model.addAttribute("rentalBooking", dto);
+            model.addAttribute("locations", locationService.getAllProvinces());
             model.addAttribute("days", days);
-            model.addAttribute("pricePerDay", pricePerDay);
-            model.addAttribute("totalPrice", totalPrice);
             model.addAttribute("isEdit", false);
+
             return "booking/form-booking";
     }
 
@@ -324,28 +328,51 @@ public class RentalBookingController {
             return "booking/form-booking";
         }
 
-        model.addAttribute("availableVehicles", matchingScheduleVehicles);
-        model.addAttribute("rentalBooking", dto);
-        model.addAttribute("locations", locationService.getAllProvinces());
+        // model.addAttribute("availableVehicles", matchingScheduleVehicles);
+        // model.addAttribute("rentalBooking", dto);
+        // model.addAttribute("locations", locationService.getAllProvinces());
 
-        // hitung harga per hari
+        // // hitung harga per hari
+        // long days = Math.max(1, (long) Math.ceil((double) java.time.Duration.between(dto.getPickUpTime(), dto.getDropOffTime()).toHours() / 24));
+        // double pricePerDay = availableVehicles.isEmpty() ? 0 : availableVehicles.get(0).getPrice();
+        // double totalPrice = pricePerDay * days;
+
+        // model.addAttribute("availableVehicles", availableVehicles);
+        // model.addAttribute("rentalBooking", dto);
+        // model.addAttribute("days", days);
+        // model.addAttribute("pricePerDay", pricePerDay);
+        // model.addAttribute("totalPrice", totalPrice);
+        // model.addAttribute("locations", locationService.getAllProvinces());
+        // model.addAttribute("isEdit", true);
+        // return "booking/form-booking"; // Tidak save ke Database
+
         long days = Math.max(1, (long) Math.ceil((double) java.time.Duration.between(dto.getPickUpTime(), dto.getDropOffTime()).toHours() / 24));
-        double pricePerDay = availableVehicles.isEmpty() ? 0 : availableVehicles.get(0).getPrice();
-        double totalPrice = pricePerDay * days;
 
-        model.addAttribute("availableVehicles", availableVehicles);
+        List<Vehicle> updatedVehicles = availableVehicles.stream()
+                .peek(v -> {
+                    double base = v.getPrice() * days;
+                    v.setPrice(base); 
+                })
+                .sorted((v1, v2) -> Double.compare(v1.getPrice(), v2.getPrice())) 
+                .toList();
+
+        if (!availableVehicles.isEmpty()) {
+            model.addAttribute("showPriceSection", true);
+        }
+        
+        model.addAttribute("availableVehicles", updatedVehicles);
         model.addAttribute("rentalBooking", dto);
-        model.addAttribute("days", days);
-        model.addAttribute("pricePerDay", pricePerDay);
-        model.addAttribute("totalPrice", totalPrice);
         model.addAttribute("locations", locationService.getAllProvinces());
-        model.addAttribute("isEdit", true);
-        return "booking/form-booking"; // Tidak save ke Database
+        model.addAttribute("days", days);
+        model.addAttribute("isEdit", true); 
+
+        return "booking/form-booking";       
     }
 
     @PutMapping("/update-details")
     public String updateDetailsSave(@ModelAttribute("rentalBooking") UpdateRentalBookingDto dto, RedirectAttributes redirectAttributes) {
         RentalBooking updated = rentalBookingService.updateRentalBookingDetails(dto);
+
         if (updated == null) {
             redirectAttributes.addFlashAttribute("errorMessage", "Gagal memperbarui booking.");
             return "redirect:/bookings/" + dto.getId();
@@ -441,12 +468,32 @@ public class RentalBookingController {
         return "booking/confirm-delete";
     }
 
-    @PostMapping("/{id}/delete")
-    public String deleteBookingConfirmed(@PathVariable String id, Model model) {
+    @DeleteMapping("/{id}/delete")
+    public String deleteBookingConfirmed(@PathVariable String id, RedirectAttributes redirectAttributes) {
         rentalBookingService.deleteRentalBooking(id);
 
-        model.addAttribute("successMessage", "Pesanan berhasil dibatalkan.");
-        return "booking/view-all";
+        redirectAttributes.addFlashAttribute("successMessage", "Pesanan berhasil dibatalkan.");
+        return "redirect:/bookings";
+    }
+
+    @GetMapping("/chart")
+    public String viewBookingChart(
+            @RequestParam(defaultValue = "Monthly") String period,
+            @RequestParam(defaultValue = "2025") int year,
+            Model model){
+        model.addAttribute("period", period);
+        model.addAttribute("year", year);
+        return "booking/booking-chart";
+    }
+
+    // Fetch data JSON Chart.js
+    @GetMapping("/api/chart")
+    @ResponseBody
+    public List<Object[]> getBookingChartData(
+            @RequestParam(defaultValue = "Quarterly") String period,
+            @RequestParam(defaultValue = "2025") int year) {
+
+        return rentalBookingService.getBookingStatistics(period, year);
     }
 
 }

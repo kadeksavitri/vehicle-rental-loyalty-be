@@ -10,32 +10,6 @@
             padding: 0;
         }
 
-        nav {
-            background-color: #009879;
-            color: white;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 14px 40px;
-        }
-
-        nav b {
-            font-size: 20px;
-        }
-
-        nav a {
-            color: white;
-            text-decoration: none;
-            margin-left: 25px;
-            font-weight: bold;
-            transition: 0.3s;
-        }
-
-        nav a:hover {
-            text-decoration: underline;
-            opacity: 0.9;
-        }
-
         .container {
             width: 40%;
             background-color: #fff;
@@ -46,7 +20,7 @@
         }
 
         h2 {
-            color: #009879;
+            color: #1aa546;
             margin-bottom: 25px;
         }
 
@@ -89,6 +63,7 @@
             background-color: #555;
             color: white;
             width: 48%;
+            margin-left: 20 px;
         }
 
         .btn-secondary:hover {
@@ -96,13 +71,14 @@
         }
 
         .btn-success {
-            background-color: #009879;
+            margin-left: 20px;
+            background-color: #1aa546;
             color: white;
             width: 48%;
         }
 
         .btn-success:hover {
-            background-color: #007f66;
+            background-color: #1aa546;
         }
 
         .btn-container {
@@ -120,14 +96,7 @@
 </head>
 
 <body>
-<nav>
-    <div><b>Vehicle Rental App</b></div>
-    <div>
-        <a href="/">Home</a>
-        <a href="/vehicles">Vehicles</a>
-        <a href="/bookings">Bookings</a>
-    </div>
-</nav>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
 
 <div class="container">
     <h2>Update Booking Status</h2>

@@ -28,4 +28,7 @@ public interface RentalBookingService {
     RentalBooking updateRentalBookingAddOn(UpdateRentalBookingDto updateRentalBookingAddOnDto);
 
     RentalBooking deleteRentalBooking(String id);
+
+    List<Object[]> getBookingStatistics(String period, int year);
+
 }

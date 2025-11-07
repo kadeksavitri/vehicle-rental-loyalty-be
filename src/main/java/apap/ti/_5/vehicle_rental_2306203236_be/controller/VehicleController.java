@@ -83,16 +83,16 @@ public class VehicleController {
         if(bindingResult.hasErrors()) {
             model.addAttribute("errorMessage", "Validation failed. Please check your input.");
             model.addAttribute("bindingResult", bindingResult);
-            return "vehicles/form";
+            return "vehicle/form";
         }
 
         Vehicle newVehicle = vehicleService.createVehicle(createVehicleDto);
         if(newVehicle == null) {
             model.addAttribute("errorMessage", "Failed to create new vehicle.");
-            return "vehicles/form";
+            return "vehicle/form";
         }
 
-        model.addAttribute("successMessage", "Successfully created new vehicle.");
+        redirectAttributes.addFlashAttribute("successMessage", "Successfully created new vehicle.");
         return "redirect:/vehicles";
     }
 
@@ -156,7 +156,7 @@ public class VehicleController {
     }
 
 
-    @GetMapping("/{id}/delete")
+    @DeleteMapping("/{id}/delete")
     public String deleteVehicle(@PathVariable("id") String id, RedirectAttributes redirectAttributes) {
         Vehicle vehicle = vehicleService.getVehicle(id);
 
@@ -172,12 +172,13 @@ public class VehicleController {
 
         Vehicle removedVehicle = vehicleService.deleteVehicle(id);
         if (removedVehicle != null) {
-            redirectAttributes.addFlashAttribute("successMessage",
-                    "Successfully delete vehicle with ID " + id);
+            redirectAttributes.addFlashAttribute("successMessage", "Successfully delete vehicle with ID " + id);
+            return "redirect:/vehicles";
         } else {
             redirectAttributes.addFlashAttribute("errorMessage",
                     "Vehicle with ID " + id + " not found.");
         }
+
         return "redirect:/vehicles";
     }
 

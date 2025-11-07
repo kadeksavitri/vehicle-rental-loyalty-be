@@ -13,41 +13,18 @@
             padding: 0;
         }
 
-        /* 🌿 Navbar Styling */
-        nav {
-            background-color: #009879;
-            color: white;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 14px 40px;
-        }
-
-        nav b {
-            font-size: 20px;
-        }
-
-        nav a {
-            color: white;
-            text-decoration: none;
-            margin-left: 25px;
-            font-weight: bold;
-            transition: 0.3s;
-        }
-
-        nav a:hover {
-            text-decoration: underline;
-            opacity: 0.9;
-        }
-
         .container {
-            margin: 40px auto;
             width: 90%;
+            margin: 40px auto;
+            background-color: #fff;
+            padding: 25px 35px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
         }
 
-        h2 {
-            color: #009879;
-            margin-bottom: 20px;
+        h1 {
+            color: #1aa546;
+            text-align: center;
         }
 
         /* 💚 Button Styling */
@@ -55,17 +32,16 @@
             border: none;
             border-radius: 6px;
             padding: 8px 14px;
-            font-weight: bold;
-            cursor: pointer;
+            cursor: pointer;;
         }
 
         .btn-success {
-            background-color: #009879;
+            background-color: #1aa546;
             color: white;
         }
 
         .btn-success:hover {
-            background-color: #007f66;
+            background-color: #1aa546;
         }
 
         .btn-info {
@@ -92,8 +68,10 @@
         }
 
         th {
-            background-color: #009879;
-            color: white;
+            background-color: #f0f0f0;
+            color: rgb(55, 55, 55);
+            font-weight: bold;
+            font-size: 14px;
         }
 
         tr:hover {
@@ -103,26 +81,29 @@
         .table-container {
             overflow-x: auto;
         }
+
+        .alert { padding: 10px; border-radius: 4px; margin-bottom: 15px; }
+        .alert-success { background: #d4edda; color: #155724; }
+        .alert-error { background: #f8d7da; color: #721c24; }
+
     </style>
 </head>
 
 <body>
-    <nav>
-        <div><b>Vehicle Rental App</b></div>
-        <div>
-            <a href="/vehicles">Vehicles</a>
-            <a href="/bookings">Bookings</a>
-        </div>
-    </nav>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+    <h1>Booking List</h1>
 
     <div class="container">
-        <div class="d-flex justify-content-between mb-3" style="display: flex; justify-content: space-between; align-items: center;">
-            <h2>Booking List</h2>
+        <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+        <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
+
+        <div class="d-flex justify-content-between mb-3" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; margin-top: 15px;">
             <div>
                 <a href="/bookings/create" class="btn btn-success">Create A New Booking</a>
-                <a href="/bookings/statistics" class="btn btn-info">Statistics</a>
+                <a href="/bookings/chart" class="btn btn-info">Statistics</a>
             </div>
         </div>
+
 
         <div class="table-container">
             <table id="bookingTable">

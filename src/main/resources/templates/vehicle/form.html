@@ -2,105 +2,195 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title th:text="${isEdit} ? 'Update Vehicle' : 'Add Vehicle'"></title>
-    <style>
-        body { font-family: Arial; background: #f5f9f6; padding: 30px; }
-        form { max-width: 700px; margin: auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        h2 { text-align: center; color: #009879; }
-        label { display: block; margin-top: 10px; }
-        input, select { width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ccc; border-radius: 6px; }
-        .actions { text-align: center; margin-top: 20px; }
-        button { background-color: #009879; color: white; border: none; padding: 10px 20px; border-radius: 6px; margin: 5px; cursor: pointer; }
-        button.cancel { background-color: gray; }
-    </style>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f6f8fa;
+        margin: 0;
+        padding: 30px;
+    }
+
+    form {
+        max-width: 600px;
+        margin: 50px auto;
+        background-color: #ffffff;
+        padding: 35px 40px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    h2 {
+        text-align: left;
+        color: #1aa546;
+        font-size: 20px;
+        margin-bottom: 25px;
+        font-weight: bold;
+    }
+
+    /* 🟢 Label dan field spacing */
+    label {
+        font-weight: bold;
+        color: #333;
+        display: block;
+        margin-bottom: 6px;
+        margin-top: 16px;
+        font-size: 14px;
+    }
+
+    input, select {
+        width: 100%;
+        padding: 12px 14px;
+        border: 1.5px solid #cfcfcf;
+        border-radius: 8px;
+        font-size: 14px;
+        outline: none;
+        background-color: #fff;
+        box-sizing: border-box;
+        transition: border-color 0.25s, box-shadow 0.25s;
+    }
+
+    input:focus, select:focus {
+        border-color: #1aa546;
+        box-shadow: 0 0 0 3px rgba(0,152,121,0.15);
+    }
+
+    /* 🔘 Tombol */
+    .actions {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-top: 30px;
+    }
+
+    button {
+        padding: 12px 28px;
+        border-radius: 6px;
+        border: none;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    button.cancel {
+        background-color: #808080;
+        color: white;
+    }
+
+    button.cancel:hover {
+        background-color: #666666;
+    }
+
+    button[type="submit"] {
+        background-color: #1aa546;
+        color: white;
+    }
+
+    button[type="submit"]:hover {
+        background-color: #007f66;
+    }
+
+    /* 📏 Responsif */
+    @media (max-width: 768px) {
+        form {
+            width: 90%;
+            padding: 25px;
+        }
+    }
+</style>
+
 </head>
+
 <body>
-    <form th:action="${isEdit} ? @{'/vehicles/' + ${vehicleId} + '/update'} : @{/vehicles/create}" th:object="${vehicle}" method="post">
-        <h2 th:text="${isEdit} ? 'Update Vehicle' : 'Create a New Vehicle'"></h2>
-        <input type="hidden" name="_method" value="put" th:if="${isEdit}"/>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
 
-        <!-- Rental Vendor -->
-        <label>Rental Vendor</label>
-        <select id="vendorSelect" th:field="*{rentalVendorId}" required>
-            <option value="">-- Select Vendor --</option>
-            <option th:each="vendor : ${vendors}"
-                    th:value="${vendor.id}"
-                    th:text="${vendor.name}">
-            </option>
+<form th:action="${isEdit} ? @{'/vehicles/' + ${vehicleId} + '/update'} : @{/vehicles/create}" th:object="${vehicle}" method="post">
+    <h2 th:text="${isEdit} ? 'Update Vehicle' : 'Create a New Vehicle'"></h2>
+    <input type="hidden" name="_method" value="put" th:if="${isEdit}"/>
+
+    <!-- Rental Vendor -->
+    <label>Rental Vendor</label>
+    <select id="vendorSelect" th:field="*{rentalVendorId}" required>
+        <option value="">-- Select Vendor --</option>
+        <option th:each="vendor : ${vendors}"
+                th:value="${vendor.id}"
+                th:text="${vendor.name}">
+        </option>
+    </select>
+
+    <!-- Vehicle Type -->
+    <label>Vehicle Type</label>
+    <select th:field="*{type}" required>
+        <option value="">-- Select Type --</option>
+        <option th:value="Sedan">Sedan</option>
+        <option th:value="SUV">SUV</option>
+        <option th:value="MPV">MPV</option>
+        <option th:value="Luxury">Luxury</option>
+    </select>
+
+    <!-- Brand -->
+    <label>Vehicle Brand</label>
+    <input type="text" th:field="*{brand}" placeholder="Enter brand">
+
+    <!-- Model -->
+    <label>Vehicle Model</label>
+    <input type="text" th:field="*{model}" placeholder="Enter model">
+
+    <!-- Production Year -->
+    <label>Production Year</label>
+    <input type="number" th:field="*{productionYear}" min="1990" max="2025">
+
+    <!-- Location -->
+    <label>Location</label>
+    <select id="locationSelect" th:field="*{location}" required>
+        <option value="">-- Select Location --</option>
+    </select>
+
+    <!-- License Plate -->
+    <label>License Plate</label>
+    <input type="text" th:field="*{licensePlate}" placeholder="Enter license plate">
+
+    <!-- Capacity -->
+    <label>Capacity</label>
+    <input type="number" th:field="*{capacity}" min="1">
+
+    <!-- Transmission -->
+    <label>Transmission</label>
+    <select th:field="*{transmission}">
+        <option value="">-- Select Transmission --</option>
+        <option th:value="Manual">Manual</option>
+        <option th:value="Automatic">Automatic</option>
+    </select>
+
+    <!-- Fuel Type -->
+    <label>Fuel Type</label>
+    <select th:field="*{fuelType}">
+        <option value="">-- Select Fuel Type --</option>
+        <option th:value="Bensin">Bensin</option>
+        <option th:value="Diesel">Diesel</option>
+        <option th:value="Hybrid">Hybrid</option>
+        <option th:value="Listrik">Listrik</option>
+    </select>
+
+    <!-- Price -->
+    <label>Price per Day</label>
+    <input type="number" th:field="*{price}" min="0">
+
+    <!-- Status (only for edit) -->
+    <div th:if="${isEdit}">
+        <label>Status</label>
+        <select th:field="*{status}">
+            <option th:value="'Available'">Available</option>
+            <option th:value="'Unavailable'">Unavailable</option>
+            <option th:value="'In Use'">In Use</option>
         </select>
+    </div>
 
-        <!-- Vehicle Type -->
-        <label>Vehicle Type</label>
-        <select th:field="*{type}" required>
-            <option value="">-- Select Type --</option>
-            <option th:value="Sedan">Sedan</option>
-            <option th:value="SUV">SUV</option>
-            <option th:value="MPV">MPV</option>
-            <option th:value="Luxury">Luxury</option>
-        </select>
-
-        <!-- Brand -->
-        <label>Brand</label>
-        <input type="text" th:field="*{brand}" placeholder="Enter brand">
-
-        <!-- Model -->
-        <label>Model</label>
-        <input type="text" th:field="*{model}" placeholder="Enter model">
-
-        <!-- Production Year -->
-        <label>Production Year</label>
-        <input type="number" th:field="*{productionYear}" min="1990" max="2025">
-
-        <!-- Location -->
-        <label>Location</label>
-        <select id="locationSelect" th:field="*{location}" required>
-            <option value="">-- Select Location --</option>
-        </select>
-
-        <!-- License Plate -->
-        <label>License Plate</label>
-        <input type="text" th:field="*{licensePlate}">
-
-        <!-- Capacity -->
-        <label>Capacity</label>
-        <input type="number" th:field="*{capacity}" min="1">
-
-        <!-- Transmission -->
-        <label>Transmission</label>
-        <select th:field="*{transmission}">
-            <option th:value="Manual">Manual</option>
-            <option th:value="Automatic">Automatic</option>
-        </select>
-
-        <!-- Fuel Type -->
-        <label>Fuel Type</label>
-        <select th:field="*{fuelType}">
-            <option th:value="Bensin">Bensin</option>
-            <option th:value="Diesel">Diesel</option>
-            <option th:value="Hybrid">Hybrid</option>
-            <option th:value="Listrik">Listrik</option>
-        </select>
-
-        <!-- Price -->
-        <label>Price per Day</label>
-        <input type="number" th:field="*{price}" min="0">
-
-        <!-- Status (only for edit) -->
-        <div th:if="${isEdit}">
-            <label>Status</label>
-            <select th:field="*{status}">
-                <option th:value="'Available'">Available</option>
-                <option th:value="'Unavailable'">Unavailable</option>
-                <option th:value="'In Use'">In Use</option>
-            </select>
-        </div>
-
-        <!-- Actions -->
-        <div class="actions">
-            <a href="/vehicles"><button type="button" class="cancel">Cancel</button></a>
-            <button type="submit">Save</button>
-        </div>
-    </form>
-</body>
+    <!-- Actions -->
+    <div class="actions">
+        <a href="/vehicles"><button type="button" class="cancel">Cancel</button></a>
+        <button type="submit">Save</button>
+    </div>
+</form>
 
 <script th:inline="javascript">
 /*<![CDATA[*/
@@ -131,12 +221,11 @@ document.addEventListener("DOMContentLoaded", function() {
     const currentVendorId = vendorSelect.value;
     const currentLocation = /*[['${vehicle.location}']]*/ '';
 
-    // ✅ panggil populate langsung saat load
     if (isEdit && currentVendorId) {
         populateLocations(currentVendorId, currentLocation);
     }
 });
 /*]]>*/
 </script>
-
+</body>
 </html>

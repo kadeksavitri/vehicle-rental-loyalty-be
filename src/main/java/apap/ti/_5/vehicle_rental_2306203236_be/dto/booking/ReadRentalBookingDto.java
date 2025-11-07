@@ -15,10 +15,14 @@ import java.util.List;
 public class ReadRentalBookingDto {
     private String id;
     private String vehicleId;
+    private String vehicleType;
+    private String vehicleBrand;
     private LocalDateTime pickUpTime;
     private LocalDateTime dropOffTime;
     private String pickUpLocation;
     private String dropOffLocation;
+    private Integer capacityNeeded;
+    private String transmissionNeeded;
     private boolean includeDriver; 
     private String status;
     private Double totalPrice;

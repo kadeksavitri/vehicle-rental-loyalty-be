@@ -21,7 +21,7 @@ import java.time.LocalDateTime;
 public class Vehicle {
 
     @Id
-    private String id; // format: VEHxxxx
+    private String id; 
 
     @Column (name = "id_rental_vendor", nullable = false)
     private Integer rentalVendorId;

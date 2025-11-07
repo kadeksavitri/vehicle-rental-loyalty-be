@@ -18,8 +18,6 @@ import apap.ti._5.vehicle_rental_2306203236_be.repository.RentalVendorRepository
 import apap.ti._5.vehicle_rental_2306203236_be.service.VehicleService;
 import apap.ti._5.vehicle_rental_2306203236_be.dto.vehicle.CreateVehicleDto;
 import apap.ti._5.vehicle_rental_2306203236_be.dto.vehicle.UpdateVehicleDto;
-import apap.ti._5.vehicle_rental_2306203236_be.dto.vehicle.ReadVehicleDto;
-
 
 @Controller
 @RequestMapping("/vehicles")
@@ -49,6 +47,7 @@ public class VehicleController {
     @GetMapping("/{id}")
     public String viewVehicle(@PathVariable ("id") String id, Model model) {
         Vehicle vehicle = vehicleService.getVehicle(id);
+
         if (vehicle == null) {
             model.addAttribute("title", "Vehicle not found");
             model.addAttribute("message", "Vehicle with id " + id + " not found");
@@ -69,8 +68,6 @@ public class VehicleController {
             RentalVendor::getListOfLocations
         ));
 
-        System.out.println("the locations: " + rentalVendorLocations);
-
         model.addAttribute("vehicle", new CreateVehicleDto());
         model.addAttribute("vendors", rentalVendors);
         model.addAttribute("rentalVendorLocations", rentalVendorLocations);
@@ -82,6 +79,7 @@ public class VehicleController {
     public String createVehicle(@Valid @ModelAttribute CreateVehicleDto createVehicleDto, 
             BindingResult bindingResult,
             RedirectAttributes redirectAttributes, Model model) {
+
         if(bindingResult.hasErrors()) {
             model.addAttribute("errorMessage", "Validation failed. Please check your input.");
             model.addAttribute("bindingResult", bindingResult);
@@ -111,7 +109,6 @@ public class VehicleController {
         if (vehicle.getStatus().equals("In Use")) {
             throw new IllegalArgumentException("Cannot update vehicle that is currently rented");
         }
-
 
         var rentalVendors = rentalVendorRepository.findAll();
         Map<Integer, List<String>> rentalVendorLocations = rentalVendors.stream()

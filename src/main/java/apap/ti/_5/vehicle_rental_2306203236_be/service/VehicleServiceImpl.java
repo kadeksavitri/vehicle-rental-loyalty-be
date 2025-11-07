@@ -1,14 +1,11 @@
 package apap.ti._5.vehicle_rental_2306203236_be.service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.UUID;
 import java.time.temporal.ChronoUnit;
 
-import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties.Sort;
 import org.springframework.stereotype.Service;
 
 import apap.ti._5.vehicle_rental_2306203236_be.model.Vehicle;

@@ -17,10 +17,12 @@ public interface RentalBookingRepository extends JpaRepository<RentalBooking, St
 
     Optional<RentalBooking> findByIdAndDeletedAtIsNull(String id);
 
-    List<RentalBooking> findByIdContainingIgnoreCaseOrVehicleId_IdContainingIgnoreCaseOrPickUpLocationContainingIgnoreCase(
+    List<RentalBooking> findByIdContainingIgnoreCaseOrVehicle_IdContainingIgnoreCaseOrPickUpLocationContainingIgnoreCase(
     String keyword1, String keyword2, String keyword3);
 
     RentalBooking findFirstByOrderByCreatedAtDesc();
+
+    List<RentalBooking> findAllByVehicleAndDeletedAtIsNull(Vehicle vehicle);
 
     @Query(value = "SELECT * FROM rental_bookings ORDER BY id DESC LIMIT 1", nativeQuery = true)
     RentalBooking findLastestRentalBookingIncludingDeleted();

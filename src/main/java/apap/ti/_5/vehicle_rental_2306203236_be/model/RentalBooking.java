@@ -22,11 +22,14 @@ import java.util.List;
 public class RentalBooking {
 
     @Id
-    private String id; // format: VRxxxxx
+    private String id; 
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "vehicle_id")
-    private Vehicle vehicleId;
+    @Column (name = "id_vehicle", nullable = false)
+    private String vehicleId;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "vehicle_id", referencedColumnName = "id")
+    private Vehicle vehicle;
 
     @Column (name = "pick_up_time", nullable = false)
     private LocalDateTime pickUpTime;
@@ -55,10 +58,10 @@ public class RentalBooking {
     @Column (name = "status", nullable = false)
     private String status; // Upcoming, Ongoing, Done
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "booking_addon",
-        joinColumns = @JoinColumn(name = "booking_id"),
+        joinColumns = @JoinColumn(name = "booking_id", referencedColumnName = "id"),
         inverseJoinColumns = @JoinColumn(name = "addon_id")
     )
     private List<RentalAddOn> listOfAddOns;

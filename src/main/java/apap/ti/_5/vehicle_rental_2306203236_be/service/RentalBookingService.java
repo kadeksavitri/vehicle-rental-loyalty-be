@@ -1,27 +1,31 @@
-// package apap.ti._5.vehicle_rental_2306203236_be.service;
+package apap.ti._5.vehicle_rental_2306203236_be.service;
 
-// import apap.ti._5.vehicle_rental_2306203236_be.model.RentalBooking;
-// import apap.ti._5.vehicle_rental_2306203236_be.dto.booking.CreateRentalBookingDto;
-// import apap.ti._5.vehicle_rental_2306203236_be.dto.booking.ReadRentalBookingDto;
-// import apap.ti._5.vehicle_rental_2306203236_be.dto.booking.UpdateRentalBookingDto;
+import apap.ti._5.vehicle_rental_2306203236_be.model.RentalBooking;
+import apap.ti._5.vehicle_rental_2306203236_be.model.Vehicle;
+import apap.ti._5.vehicle_rental_2306203236_be.dto.booking.CreateRentalBookingDto;
+import apap.ti._5.vehicle_rental_2306203236_be.dto.booking.ReadRentalBookingDto;
+import apap.ti._5.vehicle_rental_2306203236_be.dto.booking.UpdateRentalBookingDto;
 
-// import java.util.List;
+import java.time.LocalDateTime;
+import java.util.List;
 
-// public interface RentalBookingService {
+public interface RentalBookingService {
 
-//     List<RentalBooking> getAllRentalBooking(String keyword);
+    List<RentalBooking> getAllRentalBooking(String keyword);
 
-//     List<ReadRentalBookingDto> getAllRentalBookingDto(String keyword);
+    List<ReadRentalBookingDto> getAllRentalBookingDto(String keyword);
 
-//     RentalBooking getRentalBooking(String id);
+    RentalBooking getRentalBooking(String id);
 
-//     RentalBooking createRentalBooking(CreateRentalBookingDto createRentalBookingDto);
+    RentalBooking createRentalBooking(CreateRentalBookingDto createRentalBookingDto);
 
-//     RentalBooking updateRentalBookingDetails(UpdateRentalBookingDto updateRentalBookingDetailsDto);
+    RentalBooking updateRentalBookingDetails(UpdateRentalBookingDto updateRentalBookingDetailsDto);
 
-//     RentalBooking updateRentalBookingStatus(UpdateRentalBookingDto updateRentalBookingStatusDto);
+    RentalBooking updateRentalBookingStatus(String id, String newStatus);
 
-//     RentalBooking updateRentalBookingAddOn(UpdateRentalBookingDto updateRentalBookingAddOnDto);
+    boolean isVehicleAvailableDuringPeriod(Vehicle vehicle, LocalDateTime requestedPickUp, LocalDateTime requestedDropOff);
 
-//     RentalBooking deleBooking(String id);
-// }
+    RentalBooking updateRentalBookingAddOn(UpdateRentalBookingDto updateRentalBookingAddOnDto);
+
+    RentalBooking deleteRentalBooking(String id);
+}

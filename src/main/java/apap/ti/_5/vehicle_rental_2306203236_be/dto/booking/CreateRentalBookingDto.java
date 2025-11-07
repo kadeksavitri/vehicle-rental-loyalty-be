@@ -6,12 +6,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
 import java.util.List;
+
+import org.springframework.format.annotation.DateTimeFormat;
 
 @Data
 @Builder
@@ -23,10 +23,13 @@ public class CreateRentalBookingDto {
     private String vehicleId;
 
     @NotNull (message = "pickupTime is required")
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime pickUpTime;
 
     @NotNull (message = "dropOffTime is required")
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime dropOffTime;
+
 
     @NotNull (message = "Pick up location is required")
     private String pickUpLocation;

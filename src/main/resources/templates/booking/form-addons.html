@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="${isEdit} ? 'Update Booking Add-Ons' : 'Create a New Booking - Add-Ons'"></title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f6f8fa;
+            margin: 0;
+            padding: 0;
+        }
+
+        nav {
+            background-color: #009879;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 40px;
+        }
+
+        nav b {
+            font-size: 20px;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin-left: 25px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        nav a:hover {
+            text-decoration: underline;
+            opacity: 0.9;
+        }
+
+        .container {
+            width: 40%;
+            background-color: #fff;
+            margin: 40px auto;
+            padding: 30px 40px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
+        }
+
+        h2 {
+            color: #009879;
+            margin-bottom: 25px;
+        }
+
+        .addon-list {
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 15px 20px;
+            background-color: #f9f9f9;
+        }
+
+        .addon-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .addon-item:last-child {
+            border-bottom: none;
+        }
+
+        label {
+            font-weight: 500;
+            color: #333;
+            cursor: pointer;
+        }
+
+        .price {
+            font-weight: bold;
+            color: #009879;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 6px;
+            padding: 10px 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-secondary {
+            background-color: #555;
+            color: white;
+            width: 48%;
+        }
+
+        .btn-secondary:hover {
+            background-color: #333;
+        }
+
+        .btn-success {
+            background-color: #009879;
+            color: white;
+            width: 48%;
+        }
+
+        .btn-success:hover {
+            background-color: #007f66;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 25px;
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <div><b>Vehicle Rental App</b></div>
+        <div>
+            <a href="/">Home</a>
+            <a href="/vehicles">Vehicles</a>
+            <a href="/bookings">Bookings</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- ✅ Ganti binding ke ${dto}, sesuai controller -->
+        <form th:action="${isEdit} ? @{'/bookings/update-addons'} : @{/bookings/create/save}" th:object="${rentalBooking}" method="post">
+            <h2 th:text="${isEdit} ? 'Update Booking Add-Ons' : 'Create a New Booking'"></h2>
+            <input type="hidden" name="_method" value="put" th:if="${isEdit}"/>
+            <input type="hidden" th:field="*{id}" th:value="${bookingId}" th:if="${isEdit}" />
+            <p style="color:#666; margin-bottom:15px;">Choose Add-Ons</p>
+
+            <input type="hidden" th:field="*{vehicleId}" />
+            <input type="hidden" th:field="*{pickUpTime}" />
+            <input type="hidden" th:field="*{dropOffTime}" />
+            <input type="hidden" th:field="*{pickUpLocation}" />
+            <input type="hidden" th:field="*{dropOffLocation}" />
+            <input type="hidden" th:field="*{capacityNeeded}" />
+            <input type="hidden" th:field="*{transmissionNeeded}" />
+            <input type="hidden" th:field="*{includeDriver}" />
+
+            <div th:each="addon : ${addons}" class="addon-item">
+                <label>
+                    <input type="checkbox" th:value="${addon.id}" th:field="*{listOfAddOns}" />
+                    <span th:text="${addon.name}"></span>
+                </label>
+                <span class="price" th:text="'Rp ' + ${addon.price} + ',00'"></span>
+            </div>
+
+            <div class="btn-container">
+                <a href="/bookings/create" class="btn btn-secondary">Previous</a>
+                <button type="submit" class="btn btn-success">Save</button>
+            </div>
+        </form>
+
+    </div>
+</body>
+</html>

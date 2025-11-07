@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="${isEdit} ? 'Update Rental Booking' : 'Add Rental Booking'"></title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f6f8fa;
+            margin: 0;
+            padding: 0;
+        }
+
+        nav {
+            background-color: #009879;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 40px;
+        }
+
+        nav b {
+            font-size: 20px;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin-left: 25px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        nav a:hover {
+            text-decoration: underline;
+            opacity: 0.9;
+        }
+
+        .container {
+            width: 40%;
+            background-color: #fff;
+            margin: 40px auto;
+            padding: 30px 40px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
+        }
+
+        h2 {
+            color: #009879;
+            margin-bottom: 15px;
+        }
+
+        label {
+            font-weight: bold;
+            color: #009879;
+            display: block;
+            margin-bottom: 5px;
+            margin-top: 15px;
+        }
+
+        select, input[type="text"], input[type="number"], input[type="datetime-local"] {
+            width: 100%;
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+            margin-bottom: 8px;
+        }
+
+        input[type="radio"] {
+            margin-top: 10px;
+        }
+
+        .form-check {
+            margin-top: 10px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 6px;
+            padding: 10px 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-success {
+            background-color: #009879;
+            color: white;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        .btn-success:hover {
+            background-color: #007f66;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+
+        .vehicle-card {
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .vehicle-card:hover {
+            background-color: #e8fbee;
+            border-color: #009879;
+        }
+
+        .vehicle-card.alert {
+            background-color: #e8fbee;
+            border: 1px solid #009879;
+            color: #009879;
+        }
+
+        .price-section {
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .price-section p {
+            margin: 5px 0;
+            color: #333;
+        }
+
+        .highlight {
+            color: #009879;
+            font-weight: bold;
+        }
+
+        .center {
+            text-align: center;
+            margin-top: 25px;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <div><b>Vehicle Rental App</b></div>
+        <div>
+            <a href="/">Home</a>
+            <a href="/vehicles">Vehicles</a>
+            <a href="/bookings">Bookings</a>
+        </div>
+    </nav>
+
+    <!-- 🧾 Form Create Booking -->
+    <div class="container">
+        <form th:action="${isEdit} ? @{'/bookings/update-details/search'} : @{/bookings/create}" 
+              th:object="${rentalBooking}" method="post">    
+            <h2 th:text="${isEdit} ? 'Update Rental Booking' : 'Create a New Rental Booking'"></h2>    
+            <input type="hidden" name="_method" value="put" th:if="${isEdit}"/>
+           <!-- Hidden untuk CREATE -->
+            <input type="hidden" th:if="${!isEdit}" th:field="*{vehicleId}" />
+
+            <!-- Hidden untuk UPDATE -->
+            <input type="hidden" th:if="${isEdit}" th:field="*{id}" th:value="${rentalBooking.id}" />
+            <input type="hidden" th:if="${isEdit}" th:field="*{vehicleId}" th:value="${rentalBooking.vehicleId}" />
+
+
+            <div class="form-check">
+                <label>
+                    <input type="checkbox" th:field="*{includeDriver}" /> Include Driver?
+                </label>
+            </div>
+
+            <label>Pick-up Location</label>
+            <select th:field="*{pickUpLocation}" required>
+                <option value="">-- Select Pick-up Location --</option>
+                <option th:each="loc : ${locations}" th:value="${loc}" th:text="${loc}"></option>
+            </select>
+
+            <label>Drop-off Location</label>
+            <select th:field="*{dropOffLocation}" required>
+                <option value="">-- Select Drop-off Location --</option>
+                <option th:each="loc : ${locations}" th:value="${loc}" th:text="${loc}"></option>
+            </select>
+
+            <label>Pick-up Time</label>
+            <input type="datetime-local" th:field="*{pickUpTime}" required />
+
+            <label>Drop-off Time</label>
+            <input type="datetime-local" th:field="*{dropOffTime}" required />
+
+            <label>Capacity Needed</label>
+            <input type="number" th:field="*{capacityNeeded}" min="1" required />
+
+            <label>Transmission:</label>
+            <input type="radio" th:field="*{transmissionNeeded}" value="Manual" /> Manual
+            <input type="radio" th:field="*{transmissionNeeded}" value="Automatic" class="ms-2" /> Automatic
+
+            <button type="submit" class="btn btn-success">Search for Vehicles</button>
+        </form>
+
+        <div th:if="${errorMessage}" class="alert alert-danger"
+             style="background-color:#ffeaea; border:1px solid #ff6b6b; color:#b80000; padding:10px; border-radius:6px; margin-top:10px;">
+            <p th:text="${errorMessage}"></p>
+        </div>
+
+    <!-- Available Vehicles -->
+    <div th:if="${availableVehicles != null and !#lists.isEmpty(availableVehicles)}">
+        <h4 style="margin-top:25px; color:#009879;">Available Vehicles</h4>
+
+        <div th:each="v : ${availableVehicles}" 
+            class="vehicle-card" 
+            th:attr="data-vehicle-id=${v.id}, data-price=${v.price}">
+            <p><strong th:text="${v.brand + ' (' + v.type + ')'}"></strong></p>
+            <p th:text="'Total Price: Rp ' + ${#numbers.formatDecimal(v.price, 0, 0)}"></p>
+        </div>
+
+        <!-- Price Section -->
+        <div class="price-section" id="priceSection">
+            <p><strong>Booking Price Details</strong></p>
+            <p>
+                Price per Day (<span class="highlight" th:text="${days + ' day(s)'}"></span>):
+                <span id="dynamicPrice">Rp 0</span>
+            </p>
+
+            <p id="driverFeeRow" style="display:none;">
+                Driver Service (<span class="highlight" th:text="${days + ' day(s)'}"></span>):
+                <span id="driverFee">Rp 0</span>
+            </p>
+
+            <hr style="border:none; border-top:1px solid #ddd; margin:10px 0;">
+            <p>
+                <strong>Grand Total:</strong>
+                <span class="highlight" id="dynamicTotal">Rp 0</span>
+            </p>
+        </div>
+
+        <!-- FORM BUTTON BAGIAN BAWAH -->
+        <div class="center" id="proceedForm">
+            <!-- Untuk CREATE → Proceed to Add-ons -->
+            <form th:if="${!isEdit}" th:action="@{/bookings/create/addons}" th:object="${rentalBooking}" method="post">
+                <input type="hidden" id="selectedVehicleId" th:field="*{vehicleId}" />
+                <input type="hidden" th:field="*{pickUpTime}" />
+                <input type="hidden" th:field="*{dropOffTime}" />
+                <input type="hidden" th:field="*{pickUpLocation}" />
+                <input type="hidden" th:field="*{dropOffLocation}" />
+                <input type="hidden" th:field="*{capacityNeeded}" />
+                <input type="hidden" th:field="*{transmissionNeeded}" />
+                <input type="hidden" th:field="*{includeDriver}" />
+                <button type="submit" class="btn btn-primary">Proceed to Add-ons</button>
+            </form>
+
+            <!-- Untuk UPDATE → Save Changes -->
+            <form th:if="${isEdit}" th:action="@{/bookings/update-details}" th:object="${rentalBooking}" method="post">
+                <input type="hidden" name="_method" value="put" />
+                <input type="hidden" th:field="*{id}" th:value="${rentalBooking.id}" />
+                <input type="hidden" id="selectedVehicleId" th:field="*{vehicleId}" />
+                <input type="hidden" th:field="*{pickUpTime}" />
+                <input type="hidden" th:field="*{dropOffTime}" />
+                <input type="hidden" th:field="*{pickUpLocation}" />
+                <input type="hidden" th:field="*{dropOffLocation}" />
+                <input type="hidden" th:field="*{capacityNeeded}" />
+                <input type="hidden" th:field="*{transmissionNeeded}" />
+                <input type="hidden" th:field="*{includeDriver}" />
+                <button type="submit" class="btn btn-success">Save Changes</button>
+            </form>
+        </div>
+    </div>
+    </div>
+
+    <script th:inline="javascript">
+        document.addEventListener("DOMContentLoaded", function() {
+        const cards = document.querySelectorAll(".vehicle-card");
+        const priceSection = document.querySelector("#priceSection");
+        const proceedForm = document.querySelector("#proceedForm");
+        const vehicleIdInput = document.querySelector("#selectedVehicleId");
+        const dynamicPrice = document.querySelector("#dynamicPrice");
+        const dynamicTotal = document.querySelector("#dynamicTotal");
+        const driverFeeRow = document.querySelector("#driverFeeRow");
+        const driverFee = document.querySelector("#driverFee");
+
+        const includeDriverCheckbox = document.querySelector('input[name="includeDriver"]');
+        const days = /*[[${days}]]*/ 1; // Thymeleaf akan ganti angka hari
+
+        let selectedVehiclePrice = 0;
+
+        function updatePrice() {
+            const basePrice = selectedVehiclePrice * days;
+            const driverPrice = includeDriverCheckbox.checked ? (days * 100000) : 0;
+            const total = basePrice + driverPrice;
+
+            dynamicPrice.innerText = "Rp " + new Intl.NumberFormat("id-ID").format(basePrice);
+            dynamicTotal.innerText = "Rp " + new Intl.NumberFormat("id-ID").format(total);
+
+            if (includeDriverCheckbox.checked) {
+            driverFeeRow.style.display = "block";
+            driverFee.innerText = "Rp " + new Intl.NumberFormat("id-ID").format(driverPrice);
+            } else {
+            driverFeeRow.style.display = "none";
+            }
+        }
+
+        // klik kartu kendaraan
+        cards.forEach(card => {
+            card.addEventListener("click", function() {
+            cards.forEach(c => c.classList.remove("alert"));
+            card.classList.add("alert");
+
+            selectedVehiclePrice = parseFloat(card.getAttribute("data-price")) || 0;
+            vehicleIdInput.value = card.getAttribute("data-vehicle-id");
+
+            priceSection.style.display = "block";
+            proceedForm.style.display = "block";
+
+            updatePrice();
+            });
+        });
+
+        // ubah kalau toggle driver
+        includeDriverCheckbox.addEventListener("change", updatePrice);
+        });
+
+    </script>
+</body>
+</html>

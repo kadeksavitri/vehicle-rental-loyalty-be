@@ -11,12 +11,15 @@ import apap.ti._5.vehicle_rental_2306203236_be.repository.RentalBookingRepositor
 
 @Controller
 public class HomeController {
+
     @Autowired
     private VehicleRepository vehicleRepository;
+    
     @Autowired
     private RentalVendorRepository rentalVendorRepository;
+    
     @Autowired
-    private RentalBookingRepository rentalBookingRepository; // kalau belum ada, buat dummy dulu
+    private RentalBookingRepository rentalBookingRepository; 
 
     @GetMapping("/")
     public String home(Model model) {

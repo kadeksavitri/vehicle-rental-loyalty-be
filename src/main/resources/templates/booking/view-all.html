@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>All Bookings</title>
+    <link rel="stylesheet" th:href="@{/css/datatables.min.css}">
+    <script th:src="@{/js/datatables.min.js}"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #fafafa;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* 🌿 Navbar Styling */
+        nav {
+            background-color: #009879;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 40px;
+        }
+
+        nav b {
+            font-size: 20px;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin-left: 25px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        nav a:hover {
+            text-decoration: underline;
+            opacity: 0.9;
+        }
+
+        .container {
+            margin: 40px auto;
+            width: 90%;
+        }
+
+        h2 {
+            color: #009879;
+            margin-bottom: 20px;
+        }
+
+        /* 💚 Button Styling */
+        .btn {
+            border: none;
+            border-radius: 6px;
+            padding: 8px 14px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .btn-success {
+            background-color: #009879;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #007f66;
+        }
+
+        .btn-info {
+            background-color: #17a2b8;
+            color: white;
+        }
+
+        .btn-info:hover {
+            background-color: #117a8b;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            margin-top: 15px;
+            box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            text-align: center;
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #009879;
+            color: white;
+        }
+
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <div><b>Vehicle Rental App</b></div>
+        <div>
+            <a href="/vehicles">Vehicles</a>
+            <a href="/bookings">Bookings</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="d-flex justify-content-between mb-3" style="display: flex; justify-content: space-between; align-items: center;">
+            <h2>Booking List</h2>
+            <div>
+                <a href="/bookings/create" class="btn btn-success">Create A New Booking</a>
+                <a href="/bookings/statistics" class="btn btn-info">Statistics</a>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table id="bookingTable">
+                <thead>
+                <tr>
+                    <th>No</th>
+                    <th>ID</th>
+                    <th>Vehicle ID</th>
+                    <th>Pick-Up Time</th>
+                    <th>Drop-Off Time</th>
+                    <th>Pick-Up Location</th>
+                    <th>Status</th>
+                    <th>Total Price</th>
+                    <th>Action</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="booking, stat : ${rentalBookings}">
+                    <td th:text="${stat.count}"></td>
+                    <td th:text="${booking.id}"></td>
+                    <td th:text="${booking.vehicleId}"></td>
+                    <td th:text="${#temporals.format(booking.pickUpTime, 'MMMM dd, yyyy HH:mm')}"></td>
+                    <td th:text="${#temporals.format(booking.dropOffTime, 'MMMM dd, yyyy HH:mm')}"></td>
+                    <td th:text="${booking.pickUpLocation}"></td>
+                    <td th:text="${booking.status}"></td>
+                    <td th:text="'Rp ' + ${#numbers.formatDecimal(booking.totalPrice, 0, 'COMMA', 2, 'POINT')}"></td>
+                    <td>
+                        <a th:href="@{'/bookings/' + ${booking.id}}" class="btn btn-success btn-sm">Detail</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            $('#bookingTable').DataTable();
+        });
+    </script>
+</body>
+</html>

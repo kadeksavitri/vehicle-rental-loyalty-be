@@ -13,6 +13,7 @@ import apap.ti._5.vehicle_rental_2306203236_be.service.RentalBookingService;
 import apap.ti._5.vehicle_rental_2306203236_be.service.VehicleService;
 
 import jakarta.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -35,6 +36,14 @@ public class RentalBookingController {
     private RentalAddOnRepository rentalAddOnRepository;
 
     private LocationService locationService;
+
+    @Autowired
+    public RentalBookingController(RentalBookingService rentalBookingService, VehicleService vehicleService, RentalAddOnRepository rentalAddOnRepository, LocationService locationService) {
+        this.rentalBookingService = rentalBookingService;
+        this.vehicleService = vehicleService;
+        this.rentalAddOnRepository = rentalAddOnRepository;
+        this.locationService = locationService;
+    } 
 
     @GetMapping
     public String viewAllRentalBookings(@RequestParam(required = false) String keyword, Model model) {

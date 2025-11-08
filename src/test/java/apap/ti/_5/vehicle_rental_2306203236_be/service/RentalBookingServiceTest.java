@@ -1,47 +1,49 @@
 package apap.ti._5.vehicle_rental_2306203236_be.service;
 
+import apap.ti._5.vehicle_rental_2306203236_be.dto.booking.CreateRentalBookingDto;
+import apap.ti._5.vehicle_rental_2306203236_be.dto.booking.UpdateRentalBookingDto;
 import apap.ti._5.vehicle_rental_2306203236_be.model.*;
 import apap.ti._5.vehicle_rental_2306203236_be.repository.*;
-import apap.ti._5.vehicle_rental_2306203236_be.restdto.request.rentalbooking.*;
-import apap.ti._5.vehicle_rental_2306203236_be.restdto.response.rentalbooking.RentalBookingResponseDTO;
-import apap.ti._5.vehicle_rental_2306203236_be.restservice.RentalBookingRestService;
 import apap.ti._5.vehicle_rental_2306203236_be.util.IdGenerator;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.mockito.*;
-import org.springframework.boot.test.context.SpringBootTest;
-
 import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest
-class RentalBookingRestServiceTest {
+class RentalBookingServiceImplTest {
 
     @Mock private RentalBookingRepository bookingRepo;
     @Mock private VehicleRepository vehicleRepo;
     @Mock private RentalAddOnRepository addOnRepo;
     @Mock private IdGenerator idGenerator;
-
-    @InjectMocks
-    private RentalBookingRestService service;
+    @InjectMocks private RentalBookingServiceImpl service;
 
     private Vehicle vehicle;
-    private RentalAddOn addOn;
     private RentalBooking booking;
+    private RentalVendor vendor;
+    private RentalAddOn addOn;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+
+        vendor = RentalVendor.builder()
+                .id(1)
+                .name("Vendor A")
+                .listOfLocations(List.of("Depok", "Jakarta"))
+                .build();
+
         vehicle = Vehicle.builder()
-                .id("VEH0001")
+                .id("VEH001")
                 .brand("Toyota")
                 .type("SUV")
                 .price(200000.0)
                 .status("Available")
                 .location("Depok")
+                .rentalVendor(vendor)
                 .build();
 
         addOn = RentalAddOn.builder()
@@ -53,173 +55,130 @@ class RentalBookingRestServiceTest {
         booking = RentalBooking.builder()
                 .id("VR000001")
                 .vehicle(vehicle)
-                .vehicleId("VEH0001")
+                .vehicleId("VEH001")
                 .pickUpTime(LocalDateTime.now().plusHours(1))
-                .dropOffTime(LocalDateTime.now().plusHours(25))
+                .dropOffTime(LocalDateTime.now().plusDays(1))
                 .pickUpLocation("Depok")
-                .dropOffLocation("Depok")
-                .capacityNeeded(4)
-                .transmissionNeeded("Automatic")
+                .dropOffLocation("Jakarta")
                 .includeDriver(true)
                 .status("Upcoming")
-                .totalPrice(500000.0)
-                .listOfAddOns(List.of(addOn))
+                .totalPrice(300000.0)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
     }
 
-    /* ========================= CREATE ========================= */
+    /* ===================== getAllRentalBooking ===================== */
+    @Test
+    void testGetAllRentalBooking_NoKeyword() {
+        when(bookingRepo.findAllByDeletedAtIsNullOrderByCreatedAtDesc()).thenReturn(List.of(booking));
+        assertEquals(1, service.getAllRentalBooking(null).size());
+    }
+
+    @Test
+    void testGetAllRentalBooking_WithKeyword() {
+        when(bookingRepo.findByIdContainingIgnoreCaseOrVehicle_IdContainingIgnoreCaseOrPickUpLocationContainingIgnoreCase(any(), any(), any()))
+                .thenReturn(List.of(booking));
+        assertEquals(1, service.getAllRentalBooking("VR000001").size());
+    }
+
+    /* ===================== createRentalBooking ===================== */
     @Test
     void testCreateRentalBooking_Success() {
-        CreateRentalBookingRequestDTO dto = CreateRentalBookingRequestDTO.builder()
-                .vehicleId("VEH0001")
+        CreateRentalBookingDto dto = CreateRentalBookingDto.builder()
+                .vehicleId("VEH001")
                 .pickUpTime(LocalDateTime.now())
                 .dropOffTime(LocalDateTime.now().plusDays(1))
                 .pickUpLocation("Depok")
-                .dropOffLocation("Depok")
-                .capacityNeeded(4)
-                .transmissionNeeded("Automatic")
+                .dropOffLocation("Jakarta")
                 .includeDriver(true)
-                .ListOfAddOns(List.of(addOn.getId().toString()))
-                .totalPrice(1000000.0)
+                .listOfAddOns(List.of(addOn.getId().toString()))
                 .build();
 
-        when(vehicleRepo.findById("VEH0001")).thenReturn(Optional.of(vehicle));
+        when(vehicleRepo.findById("VEH001")).thenReturn(Optional.of(vehicle));
         when(bookingRepo.findLastestRentalBookingIncludingDeleted()).thenReturn(booking);
         when(idGenerator.generateRentalBookingId(any())).thenReturn("VR000002");
-        when(addOnRepo.findById(any(UUID.class))).thenReturn(Optional.of(addOn));
+        when(addOnRepo.findAll()).thenReturn(List.of(addOn));
         when(bookingRepo.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-        RentalBookingResponseDTO result = service.createRentalBooking(dto);
-        assertNotNull(result);
-        assertEquals("VR000002", result.getId());
-        assertTrue(result.getTotalPrice() > 0);
+        RentalBooking created = service.createRentalBooking(dto);
+        assertNotNull(created);
+        assertEquals("VR000002", created.getId());
     }
 
     @Test
     void testCreateRentalBooking_VehicleNotFound() {
-        CreateRentalBookingRequestDTO dto = CreateRentalBookingRequestDTO.builder()
-                .vehicleId("NOTFOUND")
-                .pickUpTime(LocalDateTime.now())
-                .dropOffTime(LocalDateTime.now().plusDays(1))
-                .pickUpLocation("Depok")
-                .dropOffLocation("Depok")
-                .capacityNeeded(4)
-                .transmissionNeeded("Automatic")
-                .includeDriver(false)
-                .totalPrice(0.0)
-                .build();
-
-        when(vehicleRepo.findById("NOTFOUND")).thenReturn(Optional.empty());
-        assertThrows(IllegalArgumentException.class, () -> service.createRentalBooking(dto));
+        when(vehicleRepo.findById("X")).thenReturn(Optional.empty());
+        CreateRentalBookingDto dto = CreateRentalBookingDto.builder()
+                .vehicleId("X").build();
+        assertNull(service.createRentalBooking(dto));
     }
 
     @Test
-    void testCreateRentalBooking_AddOnNotFound() {
-        CreateRentalBookingRequestDTO dto = CreateRentalBookingRequestDTO.builder()
-                .vehicleId("VEH0001")
+    void testCreateRentalBooking_InvalidLocationThrowsError() {
+        vendor.setListOfLocations(List.of("Depok"));
+        vehicle.setRentalVendor(vendor);
+
+        CreateRentalBookingDto dto = CreateRentalBookingDto.builder()
+                .vehicleId("VEH001")
+                .pickUpLocation("Depok")
+                .dropOffLocation("Surabaya")
                 .pickUpTime(LocalDateTime.now())
                 .dropOffTime(LocalDateTime.now().plusDays(1))
+                .build();
+
+        when(vehicleRepo.findById("VEH001")).thenReturn(Optional.of(vehicle));
+        when(bookingRepo.findLastestRentalBookingIncludingDeleted()).thenReturn(null);
+        when(idGenerator.generateRentalBookingId(any())).thenReturn("VR000002");
+        when(addOnRepo.findAll()).thenReturn(List.of(addOn));
+
+        assertThrows(IllegalArgumentException.class, () -> service.createRentalBooking(dto));
+    }
+
+    /* ===================== updateRentalBookingDetails ===================== */
+    @Test
+    void testUpdateRentalBookingDetails_Success() {
+        UpdateRentalBookingDto dto = UpdateRentalBookingDto.builder()
+                .id("VR000001")
+                .vehicleId("VEH001")
                 .pickUpLocation("Depok")
-                .dropOffLocation("Depok")
+                .dropOffLocation("Jakarta")
+                .pickUpTime(LocalDateTime.now())
+                .dropOffTime(LocalDateTime.now().plusDays(1))
+                .status("Upcoming")
                 .capacityNeeded(4)
-                .transmissionNeeded("Automatic")
+                .transmissionNeeded("Auto")
                 .includeDriver(true)
-                .ListOfAddOns(List.of(UUID.randomUUID().toString()))
                 .totalPrice(100000.0)
                 .build();
 
-        when(vehicleRepo.findById("VEH0001")).thenReturn(Optional.of(vehicle));
-        when(addOnRepo.findById(any(UUID.class))).thenReturn(Optional.empty());
-
-        assertThrows(IllegalArgumentException.class, () -> service.createRentalBooking(dto));
-    }
-
-    /* ========================= GET ALL ========================= */
-    @Test
-    void testGetAllRentalBookings() {
-        when(bookingRepo.findAllByDeletedAtIsNullOrderByCreatedAtDesc()).thenReturn(List.of(booking));
-        List<RentalBookingResponseDTO> result = service.getAllRentalBookings();
-        assertEquals(1, result.size());
-    }
-
-    @Test
-    void testGetAllRentalBookingsByKeyword_Found() {
-        when(bookingRepo.findByIdContainingIgnoreCaseOrVehicle_IdContainingIgnoreCaseOrPickUpLocationContainingIgnoreCase(any(), any(), any()))
-                .thenReturn(List.of(booking));
-        List<RentalBookingResponseDTO> result = service.getAllRentalBookingsByKeyword("VR");
-        assertEquals(1, result.size());
-    }
-
-    @Test
-    void testGetAllRentalBookingsByKeyword_EmptyKeyword() {
-        when(bookingRepo.findAllByDeletedAtIsNullOrderByCreatedAtDesc()).thenReturn(List.of(booking));
-        List<RentalBookingResponseDTO> result = service.getAllRentalBookingsByKeyword("");
-        assertEquals(1, result.size());
-    }
-
-    /* ========================= GET ONE ========================= */
-    @Test
-    void testGetRentalBooking_Success() {
         when(bookingRepo.findByIdAndDeletedAtIsNull("VR000001")).thenReturn(Optional.of(booking));
-        RentalBookingResponseDTO result = service.getRentalBooking("VR000001");
-        assertNotNull(result);
-    }
-
-    @Test
-    void testGetRentalBooking_NotFound() {
-        when(bookingRepo.findByIdAndDeletedAtIsNull(any())).thenReturn(Optional.empty());
-        assertThrows(IllegalArgumentException.class, () -> service.getRentalBooking("X"));
-    }
-
-    /* ========================= UPDATE DETAILS ========================= */
-    @Test
-    void testUpdateRentalBookingDetails_Success() {
-        UpdateRentalBookingRequestDTO dto = UpdateRentalBookingRequestDTO.builder()
-                .id("VR000001")
-                .vehicleId("VEH0001")
-                .pickUpTime(LocalDateTime.now())
-                .dropOffTime(LocalDateTime.now().plusDays(1))
-                .pickUpLocation("Depok")
-                .dropOffLocation("Depok")
-                .capacityNeeded(4)
-                .transmissionNeeded("Automatic")
-                .includeDriver(true)
-                .status("Upcoming")
-                .totalPrice(500000.0)
-                .build();
-
-        when(bookingRepo.findByIdAndDeletedAtIsNull("VR000001")).thenReturn(Optional.of(booking));
-        when(vehicleRepo.findById("VEH0001")).thenReturn(Optional.of(vehicle));
-        when(addOnRepo.findById(any(UUID.class))).thenReturn(Optional.of(addOn));
+        when(vehicleRepo.findById("VEH001")).thenReturn(Optional.of(vehicle));
         when(bookingRepo.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-        RentalBookingResponseDTO result = service.updateRentalBookingDetails(dto);
-        assertNotNull(result);
+        RentalBooking updated = service.updateRentalBookingDetails(dto);
+        assertNotNull(updated);
     }
 
     @Test
-    void testUpdateRentalBookingDetails_NotUpcoming() {
-        booking.setStatus("Done");
-        when(bookingRepo.findByIdAndDeletedAtIsNull("VR000001")).thenReturn(Optional.of(booking));
-        UpdateRentalBookingRequestDTO dto = UpdateRentalBookingRequestDTO.builder()
-                .id("VR000001").vehicleId("VEH0001").status("Done")
-                .pickUpTime(LocalDateTime.now()).dropOffTime(LocalDateTime.now().plusDays(1))
-                .pickUpLocation("Depok").dropOffLocation("Depok")
-                .capacityNeeded(2).transmissionNeeded("Auto")
-                .totalPrice(0.0).build();
-        assertThrows(IllegalStateException.class, () -> service.updateRentalBookingDetails(dto));
+    void testUpdateRentalBookingDetails_NotFound() {
+        when(bookingRepo.findByIdAndDeletedAtIsNull(any())).thenReturn(Optional.empty());
+        UpdateRentalBookingDto dto = UpdateRentalBookingDto.builder().id("X").build();
+        assertNull(service.updateRentalBookingDetails(dto));
     }
 
-    /* ========================= UPDATE STATUS ========================= */
+    /* ===================== updateRentalBookingStatus ===================== */
     @Test
-    void testUpdateStatus_UpcomingToOngoing_Success() {
+    void testUpdateStatus_UpcomingToOngoing_Valid() {
         when(bookingRepo.findByIdAndDeletedAtIsNull("VR000001")).thenReturn(Optional.of(booking));
         when(bookingRepo.findAllByVehicleAndDeletedAtIsNull(vehicle)).thenReturn(List.of());
+        when(vehicleRepo.save(any())).thenAnswer(inv -> inv.getArgument(0));
         when(bookingRepo.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-        RentalBookingResponseDTO result = service.updateRentalBookingStatus("VR000001", "Ongoing");
+        booking.setPickUpTime(LocalDateTime.now().minusMinutes(10));
+        booking.setDropOffTime(LocalDateTime.now().plusHours(1));
+
+        RentalBooking result = service.updateRentalBookingStatus("VR000001", "Ongoing");
         assertEquals("Ongoing", result.getStatus());
     }
 
@@ -227,74 +186,82 @@ class RentalBookingRestServiceTest {
     void testUpdateStatus_OngoingToDone_WithPenalty() {
         booking.setStatus("Ongoing");
         booking.setDropOffTime(LocalDateTime.now().minusHours(2));
-
         when(bookingRepo.findByIdAndDeletedAtIsNull("VR000001")).thenReturn(Optional.of(booking));
+        when(vehicleRepo.save(any())).thenAnswer(inv -> inv.getArgument(0));
         when(bookingRepo.save(any())).thenAnswer(inv -> inv.getArgument(0));
-        RentalBookingResponseDTO result = service.updateRentalBookingStatus("VR000001", "Done");
+
+        RentalBooking result = service.updateRentalBookingStatus("VR000001", "Done");
         assertEquals("Done", result.getStatus());
-        assertTrue(result.getTotalPrice() >= 0);
-    }
-
-    @Test
-    void testUpdateStatus_InvalidTransition() {
-        booking.setStatus("Upcoming");
-        when(bookingRepo.findByIdAndDeletedAtIsNull("VR000001")).thenReturn(Optional.of(booking));
-        assertThrows(IllegalStateException.class, () -> service.updateRentalBookingStatus("VR000001", "Done"));
-    }
-
-    /* ========================= UPDATE ADDON ========================= */
-    @Test
-    void testUpdateAddOn_Success() {
-        UpdateRentalBookingAddOnRequestDTO dto = new UpdateRentalBookingAddOnRequestDTO("VR000001", List.of(addOn.getId().toString()));
-        when(bookingRepo.findByIdAndDeletedAtIsNull("VR000001")).thenReturn(Optional.of(booking));
-        when(addOnRepo.findById(any(UUID.class))).thenReturn(Optional.of(addOn));
-        when(bookingRepo.save(any())).thenAnswer(inv -> inv.getArgument(0));
-
-        RentalBookingResponseDTO result = service.updateRentalBookingAddOn(dto);
-        assertNotNull(result);
         assertTrue(result.getTotalPrice() > 0);
     }
 
     @Test
-    void testUpdateAddOn_NotUpcoming() {
+    void testUpdateStatus_InvalidTransition_ReturnsNull() {
         booking.setStatus("Done");
-        when(bookingRepo.findByIdAndDeletedAtIsNull("VR000001")).thenReturn(Optional.of(booking));
-        UpdateRentalBookingAddOnRequestDTO dto = new UpdateRentalBookingAddOnRequestDTO("VR000001", List.of());
-        assertThrows(IllegalStateException.class, () -> service.updateRentalBookingAddOn(dto));
+        when(bookingRepo.findByIdAndDeletedAtIsNull(any())).thenReturn(Optional.of(booking));
+        assertNull(service.updateRentalBookingStatus("VR000001", "Ongoing"));
     }
 
-    /* ========================= DELETE ========================= */
+
+    @Test
+    void testUpdateAddOn_BookingNotFound() {
+        when(bookingRepo.findByIdAndDeletedAtIsNull(any())).thenReturn(Optional.empty());
+        UpdateRentalBookingDto dto = UpdateRentalBookingDto.builder().id("X").build();
+        assertNull(service.updateRentalBookingAddOn(dto));
+    }
+
+    /* ===================== deleteRentalBooking ===================== */
     @Test
     void testDeleteRentalBooking_Success() {
         when(bookingRepo.findByIdAndDeletedAtIsNull("VR000001")).thenReturn(Optional.of(booking));
+        when(vehicleRepo.save(any())).thenAnswer(inv -> inv.getArgument(0));
         when(bookingRepo.save(any())).thenAnswer(inv -> inv.getArgument(0));
-        RentalBookingResponseDTO result = service.deleteRentalBooking(new DeleteRentalBookingRequestDTO("VR000001"));
-        assertEquals("Done", result.getStatus());
+
+        RentalBooking deleted = service.deleteRentalBooking("VR000001");
+        assertEquals("Done", deleted.getStatus());
+        assertNotNull(deleted.getDeletedAt());
     }
 
     @Test
-    void testDeleteRentalBooking_InvalidStatus() {
+    void testDeleteRentalBooking_NotUpcoming() {
         booking.setStatus("Ongoing");
         when(bookingRepo.findByIdAndDeletedAtIsNull("VR000001")).thenReturn(Optional.of(booking));
-        assertThrows(IllegalStateException.class, () -> service.deleteRentalBooking(new DeleteRentalBookingRequestDTO("VR000001")));
+        assertNull(service.deleteRentalBooking("VR000001"));
     }
 
-    /* ========================= STATISTICS ========================= */
+    /* ===================== isVehicleAvailableDuringPeriod ===================== */
     @Test
-    void testGetRentalBookingStatistics_Quarterly() {
-        booking.setCreatedAt(LocalDateTime.of(2025, 3, 1, 0, 0));
+    void testIsVehicleAvailable_NoOverlap() {
+        when(bookingRepo.findAllByVehicleAndDeletedAtIsNull(vehicle)).thenReturn(List.of(booking));
+        boolean result = service.isVehicleAvailableDuringPeriod(vehicle,
+                booking.getDropOffTime().plusHours(1),
+                booking.getDropOffTime().plusDays(1));
+        assertTrue(result);
+    }
+
+    @Test
+    void testIsVehicleAvailable_Overlap() {
+        when(bookingRepo.findAllByVehicleAndDeletedAtIsNull(vehicle)).thenReturn(List.of(booking));
+        boolean result = service.isVehicleAvailableDuringPeriod(vehicle,
+                booking.getPickUpTime().minusHours(1),
+                booking.getDropOffTime());
+        assertFalse(result);
+    }
+
+    /* ===================== getBookingStatistics ===================== */
+    @Test
+    void testGetBookingStatistics_Quarterly() {
+        booking.setCreatedAt(LocalDateTime.of(2025, 3, 10, 0, 0));
         when(bookingRepo.findAllByDeletedAtIsNull()).thenReturn(List.of(booking));
-        ChartRentalBookingRequestDTO chart = new ChartRentalBookingRequestDTO("Quarterly", 2025);
-        List<Object[]> result = service.getRentalBookingStatistics(chart);
+        List<Object[]> result = service.getBookingStatistics("Quarterly", 2025);
         assertEquals(4, result.size());
     }
 
     @Test
-    void testGetRentalBookingStatistics_Monthly() {
-        booking.setCreatedAt(LocalDateTime.of(2025, 5, 1, 0, 0));
+    void testGetBookingStatistics_Monthly() {
+        booking.setCreatedAt(LocalDateTime.of(2025, 7, 10, 0, 0));
         when(bookingRepo.findAllByDeletedAtIsNull()).thenReturn(List.of(booking));
-        ChartRentalBookingRequestDTO chart = new ChartRentalBookingRequestDTO("Monthly", 2025);
-        List<Object[]> result = service.getRentalBookingStatistics(chart);
+        List<Object[]> result = service.getBookingStatistics("Monthly", 2025);
         assertEquals(12, result.size());
     }
 }

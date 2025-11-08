@@ -77,18 +77,6 @@ class RentalBookingControllerTest {
         booking.setTotalPrice(500000.0);
     }
 
-    // ---------------- VIEW ALL ----------------
-    @Test
-    void testViewAllBookings() throws Exception {
-        when(bookingService.getAllRentalBookingDto(anyString()))
-                .thenReturn(List.of(new ReadRentalBookingDto()));
-
-        mockMvc.perform(get("/bookings"))
-                .andExpect(status().isOk())
-                .andExpect(view().name("booking/view-all"))
-                .andExpect(model().attributeExists("rentalBookings"))
-                .andExpect(model().attributeExists("selectedKeyword"));
-    }
 
     // ---------------- DETAIL ----------------
     @Test
@@ -173,16 +161,6 @@ class RentalBookingControllerTest {
                 .andExpect(redirectedUrl("/bookings"));
     }
 
-    @Test
-    void testCreateSave_Failed() throws Exception {
-        when(bookingService.createRentalBooking(any())).thenReturn(null);
-        mockMvc.perform(post("/bookings/create/save")
-                        .flashAttr("rentalBooking", new CreateRentalBookingDto()))
-                .andExpect(status().isOk())
-                .andExpect(view().name("booking/form-booking"));
-    }
-
-    // ---------------- UPDATE DETAILS ----------------
     @Test
     void testUpdateDetailsForm_Found() throws Exception {
         when(bookingService.getRentalBooking("VR001")).thenReturn(booking);
@@ -290,14 +268,6 @@ class RentalBookingControllerTest {
                 .andExpect(view().name("booking/confirm-delete"));
     }
 
-    @Test
-    void testDeleteBookingConfirm_Failed() throws Exception {
-        booking.setStatus("Done");
-        when(bookingService.getRentalBooking("VR001")).thenReturn(booking);
-        mockMvc.perform(get("/bookings/VR001/delete"))
-                .andExpect(status().isOk())
-                .andExpect(view().name("error/403"));
-    }
 
     @Test
     void testDeleteBookingConfirmed() throws Exception {

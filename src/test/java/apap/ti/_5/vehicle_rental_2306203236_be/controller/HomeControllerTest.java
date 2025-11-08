@@ -3,10 +3,13 @@ package apap.ti._5.vehicle_rental_2306203236_be.controller;
 import apap.ti._5.vehicle_rental_2306203236_be.repository.RentalBookingRepository;
 import apap.ti._5.vehicle_rental_2306203236_be.repository.RentalVendorRepository;
 import apap.ti._5.vehicle_rental_2306203236_be.repository.VehicleRepository;
+import apap.ti._5.vehicle_rental_2306203236_be.restcontroller.VehicleRestController;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
@@ -16,8 +19,8 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
-@AutoConfigureMockMvc
+@WebMvcTest(VehicleRestController.class)
+@SuppressWarnings("removal")
 @ActiveProfiles("test")
 class HomeControllerTest {
 

@@ -20,8 +20,7 @@ import java.util.List;
 @RequestMapping("/api/vehicles")
 public class VehicleRestController {
 
-    @Autowired
-    private VehicleRestService vehicleRestService;
+    @Autowired VehicleRestService vehicleRestService;
 
     @GetMapping
     public ResponseEntity<BaseResponseDTO<List<VehicleResponseDTO>>> getAllVehicles(

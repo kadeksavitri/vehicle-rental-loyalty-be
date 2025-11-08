@@ -28,16 +28,12 @@ import java.util.stream.Collectors;
 @RequestMapping("/bookings")
 public class RentalBookingController {
 
-    @Autowired
     private RentalBookingService rentalBookingService;
 
-    @Autowired
     private VehicleService vehicleService;
 
-    @Autowired
     private RentalAddOnRepository rentalAddOnRepository;
 
-    @Autowired
     private LocationService locationService;
 
     @GetMapping
@@ -71,7 +67,7 @@ public class RentalBookingController {
     @GetMapping("/create")
     public String createRentalBookingForm(Model model) {
         CreateRentalBookingDto rentalBooking = new CreateRentalBookingDto();
-        rentalBooking.setPickUpTime(LocalDateTime.now().plusHours(1)); // default minimal
+        rentalBooking.setPickUpTime(LocalDateTime.now().plusHours(1)); 
 
         List<String> locations = locationService.getAllProvinces();
 
@@ -218,7 +214,7 @@ public class RentalBookingController {
     }
 
     @GetMapping("/{id}/update-details")
-    public String updateDetailsForm(@PathVariable String id, Model model, RedirectAttributes redirectAttributes) {
+    public String updateDetailsForm(@PathVariable("id") String id, Model model, RedirectAttributes redirectAttributes) {
         RentalBooking rentalBooking = rentalBookingService.getRentalBooking(id);
 
         if (rentalBooking == null ) {
@@ -438,7 +434,7 @@ public class RentalBookingController {
     }
 
     @GetMapping("/{id}/delete")
-    public String deleteBooking(@PathVariable String id, Model model) {
+    public String deleteBooking(@PathVariable("id") String id, Model model) {
         RentalBooking booking = rentalBookingService.getRentalBooking(id);
 
         if (booking == null || !"Upcoming".equals(booking.getStatus())) {
@@ -451,7 +447,7 @@ public class RentalBookingController {
     }
 
     @DeleteMapping("/{id}/delete")
-    public String deleteBookingConfirmed(@PathVariable String id, RedirectAttributes redirectAttributes) {
+    public String deleteBookingConfirmed(@PathVariable("id") String id, RedirectAttributes redirectAttributes) {
         rentalBookingService.deleteRentalBooking(id);
 
         redirectAttributes.addFlashAttribute("successMessage", "Pesanan berhasil dibatalkan.");

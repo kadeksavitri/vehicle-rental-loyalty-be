@@ -23,7 +23,6 @@ public interface RentalBookingRestService {
 
     RentalBookingResponseDTO updateRentalBookingStatus(String id, String newStatus);
 
-
     RentalBookingResponseDTO updateRentalBookingAddOn(UpdateRentalBookingAddOnRequestDTO dto);
 
     RentalBookingResponseDTO deleteRentalBooking(DeleteRentalBookingRequestDTO dto);

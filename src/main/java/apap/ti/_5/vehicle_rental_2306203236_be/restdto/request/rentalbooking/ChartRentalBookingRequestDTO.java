@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 public class ChartRentalBookingRequestDTO {
 
     @NotBlank(message = "Period is required (Monthly or Quarterly)")
-    private String period; // "Monthly" atau "Quarterly"
+    private String period;
 
     @Min(value = 2000, message = "Year must be >= 2000")
     @Max(value = 2100, message = "Year must be <= 2100")

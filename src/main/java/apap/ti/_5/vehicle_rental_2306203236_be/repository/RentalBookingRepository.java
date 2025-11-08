@@ -26,4 +26,7 @@ public interface RentalBookingRepository extends JpaRepository<RentalBooking, St
 
     @Query(value = "SELECT * FROM rental_bookings ORDER BY id DESC LIMIT 1", nativeQuery = true)
     RentalBooking findLastestRentalBookingIncludingDeleted();
+    
+    boolean existsByVehicleAndStatusIn(Vehicle vehicle, List<String> statuses);
+
 }

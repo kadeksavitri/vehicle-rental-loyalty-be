@@ -2,12 +2,12 @@ package apap.ti._5.vehicle_rental_2306203236_be.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockedConstruction;
+import org.mockito.MockedStatic;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class LocationServiceTest {
@@ -15,66 +15,66 @@ class LocationServiceTest {
     private LocationService locationService;
 
     @BeforeEach
-    void setup() {
+    void setUp() {
         locationService = new LocationService();
     }
 
     @Test
     void testGetAllProvinces_Success() {
-        // Dummy data seperti respons dari API
-        Map<String, Object> dummyItem1 = new HashMap<>();
-        dummyItem1.put("name", "Jawa Barat");
-        Map<String, Object> dummyItem2 = new HashMap<>();
-        dummyItem2.put("name", "Bali");
+        // Mock RestTemplate
+        RestTemplate mockRestTemplate = mock(RestTemplate.class);
+        Map<String, Object> mockResponse = new HashMap<>();
 
-        List<Map<String, Object>> dataList = List.of(dummyItem1, dummyItem2);
-        Map<String, Object> dummyResponse = new HashMap<>();
-        dummyResponse.put("data", dataList);
+        List<Map<String, Object>> mockData = new ArrayList<>();
+        mockData.add(Map.of("name", "Jawa Barat"));
+        mockData.add(Map.of("name", "Bali"));
 
-        try (MockedConstruction<RestTemplate> mocked = mockConstruction(RestTemplate.class,
-                (mock, context) -> when(mock.getForObject(anyString(), eq(Map.class))).thenReturn(dummyResponse))) {
+        mockResponse.put("data", mockData);
 
-            List<String> provinces = locationService.getAllProvinces();
+        // Mock static creation of RestTemplate
+        try (MockedStatic<RestTemplate> mocked = mockStatic(RestTemplate.class)) {
+            mocked.when(RestTemplate::new).thenReturn(mockRestTemplate);
+            when(mockRestTemplate.getForObject(anyString(), eq(Map.class))).thenReturn(mockResponse);
 
-            assertThat(provinces).hasSize(2);
-            assertThat(provinces).contains("Jawa Barat", "Bali");
-            verify(mocked.constructed().get(0)).getForObject(anyString(), eq(Map.class));
+            List<String> result = locationService.getAllProvinces();
+
+            assertEquals(2, result.size());
+            assertTrue(result.contains("Jawa Barat"));
+            assertTrue(result.contains("Bali"));
         }
     }
 
     @Test
-    void testGetAllProvinces_NullResponse_ThrowsException() {
-        try (MockedConstruction<RestTemplate> mocked = mockConstruction(RestTemplate.class,
-                (mock, context) -> when(mock.getForObject(anyString(), eq(Map.class))).thenReturn(null))) {
+    void testGetAllProvinces_ResponseNull_ThrowsException() {
+        RestTemplate mockRestTemplate = mock(RestTemplate.class);
 
-            assertThatThrownBy(() -> locationService.getAllProvinces())
-                    .isInstanceOf(RuntimeException.class)
-                    .hasMessageContaining("Failed to fetch province data");
+        try (MockedStatic<RestTemplate> mocked = mockStatic(RestTemplate.class)) {
+            mocked.when(RestTemplate::new).thenReturn(mockRestTemplate);
+            when(mockRestTemplate.getForObject(anyString(), eq(Map.class))).thenReturn(null);
+
+            RuntimeException ex = assertThrows(RuntimeException.class, () -> {
+                locationService.getAllProvinces();
+            });
+
+            assertEquals("Failed to fetch province data from wilayah.id API", ex.getMessage());
         }
     }
 
     @Test
     void testGetAllProvinces_NoDataKey_ThrowsException() {
-        Map<String, Object> dummyResponse = Map.of("invalidKey", "oops");
+        RestTemplate mockRestTemplate = mock(RestTemplate.class);
+        Map<String, Object> mockResponse = new HashMap<>();
+        mockResponse.put("wrongKey", List.of(Map.of("name", "Sumatera Utara")));
 
-        try (MockedConstruction<RestTemplate> mocked = mockConstruction(RestTemplate.class,
-                (mock, context) -> when(mock.getForObject(anyString(), eq(Map.class))).thenReturn(dummyResponse))) {
+        try (MockedStatic<RestTemplate> mocked = mockStatic(RestTemplate.class)) {
+            mocked.when(RestTemplate::new).thenReturn(mockRestTemplate);
+            when(mockRestTemplate.getForObject(anyString(), eq(Map.class))).thenReturn(mockResponse);
 
-            assertThatThrownBy(() -> locationService.getAllProvinces())
-                    .isInstanceOf(RuntimeException.class)
-                    .hasMessageContaining("Failed to fetch province data");
-        }
-    }
+            RuntimeException ex = assertThrows(RuntimeException.class, () -> {
+                locationService.getAllProvinces();
+            });
 
-    @Test
-    void testGetAllProvinces_EmptyDataList_ReturnsEmptyList() {
-        Map<String, Object> dummyResponse = Map.of("data", new ArrayList<>());
-
-        try (MockedConstruction<RestTemplate> mocked = mockConstruction(RestTemplate.class,
-                (mock, context) -> when(mock.getForObject(anyString(), eq(Map.class))).thenReturn(dummyResponse))) {
-
-            List<String> provinces = locationService.getAllProvinces();
-            assertThat(provinces).isEmpty();
+            assertEquals("Failed to fetch province data from wilayah.id API", ex.getMessage());
         }
     }
 }

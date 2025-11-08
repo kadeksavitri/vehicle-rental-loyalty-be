@@ -4,15 +4,14 @@ import apap.ti._5.vehicle_rental_2306203236_be.model.Vehicle;
 import apap.ti._5.vehicle_rental_2306203236_be.model.RentalVendor;
 import apap.ti._5.vehicle_rental_2306203236_be.repository.VehicleRepository;
 import apap.ti._5.vehicle_rental_2306203236_be.repository.RentalVendorRepository;
+import apap.ti._5.vehicle_rental_2306203236_be.repository.RentalBookingRepository;
 import apap.ti._5.vehicle_rental_2306203236_be.restdto.request.vehicle.AddVehicleRequestDTO;
 import apap.ti._5.vehicle_rental_2306203236_be.restdto.request.vehicle.UpdateVehicleRequestDTO;
 import apap.ti._5.vehicle_rental_2306203236_be.restdto.response.vehicle.VehicleResponseDTO;
 import apap.ti._5.vehicle_rental_2306203236_be.util.IdGenerator;
 
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -20,16 +19,19 @@ import java.util.stream.Collectors;
 @Service
 public class VehicleRestServiceImpl implements VehicleRestService {
 
+    private final RentalBookingRepository rentalBookingRepository;
+
     private final VehicleRepository vehicleRepository;
     private final RentalVendorRepository rentalVendorRepository;
     private final IdGenerator idGenerator;
 
     public VehicleRestServiceImpl(VehicleRepository vehicleRepository,
-                                  RentalVendorRepository rentalVendorRepository,
+                                  RentalVendorRepository rentalVendorRepository, RentalBookingRepository rentalBookingRepository,
                                   IdGenerator idGenerator) {
         this.vehicleRepository = vehicleRepository;
         this.rentalVendorRepository = rentalVendorRepository;
         this.idGenerator = idGenerator;
+        this.rentalBookingRepository = rentalBookingRepository;
     }
 
     @Override
@@ -143,6 +145,14 @@ public class VehicleRestServiceImpl implements VehicleRestService {
         Vehicle vehicle = vehicleRepository.findById(id).orElse(null);
         if (vehicle == null) return null;
 
+        boolean hasActiveBooking = rentalBookingRepository.existsByVehicleAndStatusIn(
+            vehicle,
+            List.of("Upcoming", "Ongoing")
+        );
+
+        if (hasActiveBooking) {
+            throw new IllegalArgumentException("Cannot delete vehicle that still has active bookings");
+        }
         if ("In Use".equalsIgnoreCase(vehicle.getStatus()))
             throw new IllegalArgumentException("Cannot delete vehicle that is currently rented");
 

@@ -24,7 +24,6 @@ import java.util.List;
 @RequestMapping("/api/bookings")
 public class RentalBookingRestController {
 
-    @Autowired
     private RentalBookingRestService rentalBookingRestService;
 
     @GetMapping

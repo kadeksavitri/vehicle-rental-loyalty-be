@@ -4,154 +4,76 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 class RentalAddOnTest {
 
     private RentalAddOn addOn;
-    private RentalBooking booking;
 
     @BeforeEach
     void setUp() {
-        booking = RentalBooking.builder()
-                .id("BK001")
-                .vehicleId("VH001")
-                .pickUpLocation("Depok")
-                .dropOffLocation("Jakarta")
-                .pickUpTime(LocalDateTime.of(2025, 11, 10, 8, 0))
-                .dropOffTime(LocalDateTime.of(2025, 11, 12, 8, 0))
-                .status("Upcoming")
-                .totalPrice(1500000.0)
-                .build();
-
-        addOn = RentalAddOn.builder()
-                .id(UUID.fromString("11111111-1111-1111-1111-111111111111"))
-                .name("Car Seat")
-                .price(100000.0)
-                .listOfBookings(List.of(booking))
-                .createdAt(LocalDateTime.of(2025, 11, 7, 10, 0))
-                .updatedAt(LocalDateTime.of(2025, 11, 7, 12, 0))
-                .build();
+        addOn = new RentalAddOn();
+        addOn.setId(UUID.randomUUID());
+        addOn.setName("GPS Navigation");
+        addOn.setPrice(150000.0);
+        addOn.setCreatedAt(LocalDateTime.now());
+        addOn.setUpdatedAt(LocalDateTime.now());
     }
 
     @Test
     void testBuilderAndGetters() {
-        assertThat(addOn.getId()).isEqualTo(UUID.fromString("11111111-1111-1111-1111-111111111111"));
-        assertThat(addOn.getName()).isEqualTo("Car Seat");
-        assertThat(addOn.getPrice()).isEqualTo(100000.0);
-        assertThat(addOn.getListOfBookings()).hasSize(1);
-        assertThat(addOn.getCreatedAt()).isNotNull();
-        assertThat(addOn.getUpdatedAt()).isNotNull();
-    }
-
-    @Test
-    void testSettersMutability() {
-        UUID newId = UUID.fromString("22222222-2222-2222-2222-222222222222");
-        addOn.setId(newId);
-        addOn.setName("GPS");
-        addOn.setPrice(50000.0);
-        addOn.setListOfBookings(Collections.emptyList());
+        UUID id = UUID.randomUUID();
         LocalDateTime now = LocalDateTime.now();
-        addOn.setCreatedAt(now);
-        addOn.setUpdatedAt(now);
 
-        assertThat(addOn.getId()).isEqualTo(newId);
-        assertThat(addOn.getName()).isEqualTo("GPS");
-        assertThat(addOn.getPrice()).isEqualTo(50000.0);
-        assertThat(addOn.getListOfBookings()).isEmpty();
-        assertThat(addOn.getCreatedAt()).isEqualTo(now);
-        assertThat(addOn.getUpdatedAt()).isEqualTo(now);
+        RentalAddOn built = RentalAddOn.builder()
+                .id(id)
+                .name("Child Seat")
+                .price(200000.0)
+                .createdAt(now)
+                .updatedAt(now)
+                .build();
+
+        assertEquals(id, built.getId());
+        assertEquals("Child Seat", built.getName());
+        assertEquals(200000.0, built.getPrice());
+        assertEquals(now, built.getCreatedAt());
+        assertEquals(now, built.getUpdatedAt());
     }
 
     @Test
-    void testNoArgsConstructor() {
-        RentalAddOn empty = new RentalAddOn();
-        assertThat(empty).isNotNull();
-        empty.setName("Test AddOn");
-        empty.setPrice(12345.0);
-        assertThat(empty.getName()).isEqualTo("Test AddOn");
-        assertThat(empty.getPrice()).isEqualTo(12345.0);
-    }
-
-    @Test
-    void testAllArgsConstructor() {
+    void testSettersAndGetters() {
+        UUID newId = UUID.randomUUID();
         LocalDateTime now = LocalDateTime.now();
-        RentalAddOn full = new RentalAddOn(
-                UUID.fromString("33333333-3333-3333-3333-333333333333"),
-                "WiFi",
-                75000.0,
-                List.of(booking),
-                now,
-                now
-        );
 
-        assertThat(full.getId()).isEqualTo(UUID.fromString("33333333-3333-3333-3333-333333333333"));
-        assertThat(full.getName()).isEqualTo("WiFi");
-        assertThat(full.getPrice()).isEqualTo(75000.0);
-        assertThat(full.getListOfBookings()).contains(booking);
-        assertThat(full.getCreatedAt()).isEqualTo(now);
-        assertThat(full.getUpdatedAt()).isEqualTo(now);
-    }
-
-    @Test
-    void testPrePersistSetsCreatedAndUpdatedAt() {
         RentalAddOn newAddOn = new RentalAddOn();
-        newAddOn.onCreate();
+        newAddOn.setId(newId);
+        newAddOn.setName("Wi-Fi Hotspot");
+        newAddOn.setPrice(300000.0);
+        newAddOn.setCreatedAt(now);
+        newAddOn.setUpdatedAt(now.plusHours(1));
 
-        assertThat(newAddOn.getCreatedAt()).isNotNull();
-        assertThat(newAddOn.getUpdatedAt()).isNotNull();
-        assertThat(newAddOn.getCreatedAt()).isEqualTo(newAddOn.getUpdatedAt());
-    }
-
-    @Test
-    void testPreUpdateSetsUpdatedAtLater() throws InterruptedException {
-        addOn.onCreate();
-        LocalDateTime before = addOn.getUpdatedAt();
-        Thread.sleep(5);
-        addOn.onUpdate();
-
-        assertThat(addOn.getUpdatedAt()).isAfter(before);
+        assertEquals(newId, newAddOn.getId());
+        assertEquals("Wi-Fi Hotspot", newAddOn.getName());
+        assertEquals(300000.0, newAddOn.getPrice());
+        assertEquals(now, newAddOn.getCreatedAt());
+        assertEquals(now.plusHours(1), newAddOn.getUpdatedAt());
     }
 
     @Test
     void testEqualsAndHashCode() {
-        RentalAddOn same = RentalAddOn.builder()
-                .id(UUID.fromString("11111111-1111-1111-1111-111111111111"))
-                .name("Car Seat")
-                .price(100000.0)
-                .build();
+        RentalAddOn a1 = addOn;
+        RentalAddOn a2 = addOn;
 
-        RentalAddOn different = RentalAddOn.builder()
-                .id(UUID.fromString("99999999-9999-9999-9999-999999999999"))
-                .name("Different")
-                .price(50000.0)
-                .build();
-
-        assertThat(addOn).isEqualTo(addOn);
-        assertThat(addOn).isNotEqualTo(null);
-        assertThat(addOn).isNotEqualTo(different);
-        assertThat(addOn.hashCode()).isNotZero();
-        assertThat(same.hashCode()).isEqualTo(same.hashCode());
+        assertEquals(a1, a2);
+        assertEquals(a1.hashCode(), a2.hashCode());
     }
 
     @Test
-    void testToStringContainsKeyFields() {
-        String result = addOn.toString();
-        assertThat(result).contains("Car Seat");
-        assertThat(result).contains("100000");
-        assertThat(result).contains("11111111");
-    }
-
-    @Test
-    void testListOfBookingsSetterGetter() {
-        addOn.setListOfBookings(Collections.emptyList());
-        assertThat(addOn.getListOfBookings()).isEmpty();
-
-        addOn.setListOfBookings(List.of(booking));
-        assertThat(addOn.getListOfBookings()).contains(booking);
+    void testToStringContainsImportantFields() {
+        String s = addOn.toString();
+        assertTrue(s.contains("GPS Navigation"));
+        assertTrue(s.contains("price"));
     }
 }

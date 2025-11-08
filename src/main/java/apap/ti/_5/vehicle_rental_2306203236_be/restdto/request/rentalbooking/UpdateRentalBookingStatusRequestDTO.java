@@ -16,5 +16,5 @@ public class UpdateRentalBookingStatusRequestDTO {
     private String id;
 
     @NotBlank(message = "New status is required")
-    private String newStatus; // e.g. "Upcoming", "Ongoing", "Done", "Cancelled"
+    private String newStatus;
 }

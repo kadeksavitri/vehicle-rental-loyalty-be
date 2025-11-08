@@ -55,7 +55,6 @@ public class DataSeeder {
         List<RentalVendor> vendorList = new ArrayList<>();
 
         for (int i = 0; i < 5; i++) { // generate 5 vendors
-            // acak urutan dan ambil 5 lokasi unik
             Collections.shuffle(allProvinces);
             List<String> vendorLocations = allProvinces.stream()
                     .limit(5)

@@ -4,51 +4,14 @@
     <title>Rental Booking Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f6f8fa;
-            margin: 0;
-        }
-        .container {
-            width: 800px;
-            height: auto;
-            margin: 40px auto;
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
-        }
-        h1 {
-            text-align: center;
-            color: #1aa546;
-            margin-top: 30px;
-        }
-        select {
-            padding: 8px;
-            margin: 10px;
-            border-radius: 6px;
-            border: 1px solid #ccc;
-        }
-        .table-wrapper {
-            overflow-x: auto;
-            margin-top: 20px;
-        }
-        #summaryTable {
-
-            min-width: 700px; 
-            border-collapse: collapse;
-            table-layout: fixed; 
-            word-wrap: break-word;
-        }        
-        #summaryTable th, #summaryTable td {
-            border: 1px solid #ddd;
-            text-align: center;
-            padding: 8px;
-        }
-        #summaryTable th {
-            background-color: #1aa546;
-            color: white;
-        }
+        body {font-family: Arial, sans-serif;background-color: #f6f8fa;margin: 0;}
+        .container {width: 800px;height: auto;margin: 40px auto;background-color: #fff;padding: 30px;border-radius: 10px;box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);}
+        h1 {text-align: center;color: #1aa546;margin-top: 30px;}
+        select {padding: 8px;margin: 10px;border-radius: 6px;border: 1px solid #ccc;}
+        .table-wrapper {overflow-x: auto;margin-top: 20px;}
+        #summaryTable {min-width: 700px; border-collapse: collapse;table-layout: fixed; word-wrap: break-word;}        
+        #summaryTable th, #summaryTable td {border: 1px solid #ddd;text-align: center;padding: 8px;}
+        #summaryTable th {background-color: #1aa546;color: white;}
     </style>
 </head>
 
@@ -106,14 +69,12 @@
         const data = await response.json();
 
         const labels = data.map(item => item[0]);
-        const counts = data.map(item => Math.round(item[1])); // bulatkan nilai
+        const counts = data.map(item => Math.round(item[1])); 
 
-        // hancurkan chart lama kalau ada
         if (window.bookingChart && typeof window.bookingChart.destroy === "function") {
             window.bookingChart.destroy();
         }
 
-        // buat chart baru
         window.bookingChart = new Chart(ctx, {
           type: "bar",
           data: {
@@ -139,7 +100,6 @@
               y: {
                 beginAtZero: true,
                 ticks: {
-                  // supaya bilangan bulat
                   stepSize: 1,
                   callback: function(value) {
                     return Math.round(value);
@@ -151,7 +111,6 @@
           }
         });
 
-        // update tabel ringkasan
         summaryHeader.innerHTML = "";
         summaryValues.innerHTML = "";
 

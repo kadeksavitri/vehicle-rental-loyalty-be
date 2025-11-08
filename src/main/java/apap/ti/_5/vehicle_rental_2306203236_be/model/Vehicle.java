@@ -31,7 +31,7 @@ public class Vehicle {
     private RentalVendor rentalVendor;
 
     @Column (name = "type", nullable = false)
-    private String type; // Sedan, SUV, MPV, Luxury
+    private String type; 
 
     @Column (name = "brand")
     private String brand;
@@ -52,10 +52,10 @@ public class Vehicle {
     private Integer capacity;
 
     @Column (name = "transmission", nullable = false)
-    private String transmission; // Manual / Automatic
+    private String transmission; 
 
     @Column (name = "fuel_type", nullable = false)
-    private String fuelType; // Bensin, Diesel, Hybrid, Listrik
+    private String fuelType;
 
     @Column (name = "price", nullable = false)
     private Double price;

@@ -1,233 +1,282 @@
-// package apap.ti._5.vehicle_rental_2306203236_be.controller;
+package apap.ti._5.vehicle_rental_2306203236_be.controller;
 
-// import apap.ti._5.vehicle_rental_2306203236_be.dto.vehicle.CreateVehicleDto;
-// import apap.ti._5.vehicle_rental_2306203236_be.dto.vehicle.ReadVehicleDto;
-// import apap.ti._5.vehicle_rental_2306203236_be.dto.vehicle.UpdateVehicleDto;
-// import apap.ti._5.vehicle_rental_2306203236_be.model.RentalVendor;
-// import apap.ti._5.vehicle_rental_2306203236_be.model.Vehicle;
-// import apap.ti._5.vehicle_rental_2306203236_be.repository.RentalVendorRepository;
-// import apap.ti._5.vehicle_rental_2306203236_be.service.VehicleService;
-// import org.junit.jupiter.api.BeforeEach;
-// import org.junit.jupiter.api.Test;
-// import org.springframework.beans.factory.annotation.Autowired;
-// import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-// import org.springframework.boot.test.context.SpringBootTest;
-// import org.springframework.boot.test.mock.mockito.MockBean;
-// import org.springframework.test.context.ActiveProfiles;
-// import org.springframework.test.web.servlet.MockMvc;
-// import org.springframework.validation.BindingResult;
+import apap.ti._5.vehicle_rental_2306203236_be.dto.vehicle.CreateVehicleDto;
+import apap.ti._5.vehicle_rental_2306203236_be.dto.vehicle.ReadVehicleDto;
+import apap.ti._5.vehicle_rental_2306203236_be.dto.vehicle.UpdateVehicleDto;
+import apap.ti._5.vehicle_rental_2306203236_be.model.RentalVendor;
+import apap.ti._5.vehicle_rental_2306203236_be.model.Vehicle;
+import apap.ti._5.vehicle_rental_2306203236_be.repository.RentalVendorRepository;
+import apap.ti._5.vehicle_rental_2306203236_be.service.VehicleService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-// import java.util.List;
-// import java.util.Map;
+import java.time.LocalDateTime;
+import java.util.*;
 
-// import static org.mockito.ArgumentMatchers.*;
-// import static org.mockito.Mockito.when;
-// import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-// import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 
-// @SpringBootTest
-// @AutoConfigureMockMvc
-// @ActiveProfiles("test")
-// class VehicleControllerTest {
+class VehicleControllerTest {
 
-//     @Autowired private MockMvc mockMvc;
+    @Mock
+    private VehicleService vehicleService;
 
-//     @MockBean private VehicleService vehicleService;
-//     @MockBean private RentalVendorRepository vendorRepo;
+    @Mock
+    private RentalVendorRepository rentalVendorRepository;
 
-//     private Vehicle vehicle;
-//     private RentalVendor vendor;
+    @Mock
+    private Model model;
 
-//     @BeforeEach
-//     void setup() {
-//         vendor = RentalVendor.builder()
-//                 .id(1)
-//                 .name("Vendor A")
-//                 .listOfLocations(List.of("Depok","Jakarta"))
-//                 .build();
+    @Mock
+    private BindingResult bindingResult;
 
-//         vehicle = Vehicle.builder()
-//                 .id("VH001")
-//                 .rentalVendor(vendor)
-//                 .rentalVendorId(1)
-//                 .brand("Toyota")
-//                 .model("Avanza")
-//                 .type("MPV")
-//                 .status("Available")
-//                 .build();
+    @Mock
+    private RedirectAttributes redirectAttributes;
 
-//         when(vehicleService.getAllVehicleDto(any(), any()))
-//                 .thenReturn(List.of(new ReadVehicleDto()));
-//         when(vehicleService.getVehicle("VH001")).thenReturn(vehicle);
-//         when(vehicleService.getVehicle("NOTFOUND")).thenReturn(null);
-//         when(vehicleService.createVehicle(any())).thenReturn(vehicle);
-//         when(vehicleService.updateVehicle(any())).thenReturn(vehicle);
-//         when(vehicleService.deleteVehicle("VH001")).thenReturn(vehicle);
-//         when(vendorRepo.findAll()).thenReturn(List.of(vendor));
-//     }
+    @InjectMocks
+    private VehicleController vehicleController;
 
-//     // ---------- viewAll ----------
-//     @Test
-//     void testViewAllVehicles() throws Exception {
-//         mockMvc.perform(get("/vehicles")
-//                         .param("keyword","ava").param("type","MPV"))
-//                 .andExpect(status().isOk())
-//                 .andExpect(view().name("vehicle/view-all"))
-//                 .andExpect(model().attributeExists("vehicles"));
-//     }
+    private Vehicle vehicle;
+    private RentalVendor vendor;
 
-//     // ---------- viewDetail ----------
-//     @Test
-//     void testViewVehicleFound() throws Exception {
-//         mockMvc.perform(get("/vehicles/VH001"))
-//                 .andExpect(status().isOk())
-//                 .andExpect(view().name("vehicle/detail"))
-//                 .andExpect(model().attributeExists("vehicle"));
-//     }
+@BeforeEach
+void setUp() {
+    MockitoAnnotations.openMocks(this);
 
-//     @Test
-//     void testViewVehicleNotFound() throws Exception {
-//         mockMvc.perform(get("/vehicles/NOTFOUND"))
-//                 .andExpect(status().isOk())
-//                 .andExpect(view().name("error/404"))
-//                 .andExpect(model().attributeExists("title","message"));
-//     }
+    vendor = RentalVendor.builder()
+            .id(1)
+            .name("Vendor A")
+            .email("vendor@example.com")
+            .phone("0812345678")
+            .listOfLocations(List.of("Depok", "Jakarta"))
+            .createdAt(LocalDateTime.now())
+            .updatedAt(LocalDateTime.now())
+            .build();
 
-//     // ---------- createForm ----------
-//     @Test
-//     void testCreateVehicleForm() throws Exception {
-//         mockMvc.perform(get("/vehicles/create"))
-//                 .andExpect(status().isOk())
-//                 .andExpect(view().name("vehicle/form"))
-//                 .andExpect(model().attribute("isEdit",false))
-//                 .andExpect(model().attributeExists("vehicle","vendors","rentalVendorLocations"));
-//     }
+    vehicle = Vehicle.builder()
+            .id("VEH0001")
+            .rentalVendorId(1)
+            .rentalVendor(vendor)
+            .type("Car")
+            .brand("Toyota")
+            .model("Avanza")
+            .productionYear(2022)
+            .location("Depok")
+            .licensePlate("B1234XYZ")
+            .capacity(5)
+            .transmission("Automatic")
+            .fuelType("Gasoline")
+            .price(500000.0)
+            .status("Available")
+            .createdAt(LocalDateTime.now())
+            .build();
+}
 
-//     // ---------- createVehicle ----------
-//     @Test
-//     void testCreateVehicleValidationError() throws Exception {
-//         CreateVehicleDto dto = new CreateVehicleDto();
-//         mockMvc.perform(post("/vehicles/create")
-//                         .flashAttr("createVehicleDto", dto)
-//                         .flashAttr("bindingResult", (BindingResult) null))
-//                 .andExpect(status().isOk())
-//                 .andExpect(view().name("vehicle/form"));
-//     }
 
-//     @Test
-//     void testCreateVehicleNullReturned() throws Exception {
-//         when(vehicleService.createVehicle(any())).thenReturn(null);
-//         mockMvc.perform(post("/vehicles/create")
-//                         .flashAttr("createVehicleDto", new CreateVehicleDto()))
-//                 .andExpect(status().isOk())
-//                 .andExpect(view().name("vehicle/form"))
-//                 .andExpect(model().attributeExists("errorMessage"));
-//     }
+    // ----------- GET ALL -----------
+    @Test
+    void testViewAllVehicles() {
+        List<ReadVehicleDto> dtoList = List.of(ReadVehicleDto.builder()
+                .id("VEH0001")
+                .brand("Toyota")
+                .type("Car")
+                .build());
 
-//     @Test
-//     void testCreateVehicleSuccess() throws Exception {
-//         mockMvc.perform(post("/vehicles/create")
-//                         .flashAttr("createVehicleDto", new CreateVehicleDto()))
-//                 .andExpect(status().is3xxRedirection())
-//                 .andExpect(redirectedUrl("/vehicles"));
-//     }
+        when(vehicleService.getAllVehicleDto(null, null)).thenReturn(dtoList);
 
-//     // ---------- updateForm ----------
-//     @Test
-//     void testUpdateFormFound() throws Exception {
-//         mockMvc.perform(get("/vehicles/update/VH001"))
-//                 .andExpect(status().isOk())
-//                 .andExpect(view().name("vehicle/form"))
-//                 .andExpect(model().attribute("isEdit", true));
-//     }
+        String view = vehicleController.viewAllVehicles(null, null, model);
 
-//     @Test
-//     void testUpdateFormNotFound() throws Exception {
-//         mockMvc.perform(get("/vehicles/update/NOTFOUND"))
-//                 .andExpect(status().isOk())
-//                 .andExpect(view().name("error/404"));
-//     }
+        verify(model).addAttribute("vehicles", dtoList);
+        verify(model).addAttribute("selectedKeyword", null);
+        verify(model).addAttribute("selectedType", null);
+        assertEquals("vehicle/view-all", view);
+    }
 
-//     @Test
-//     void testUpdateFormThrowsException() throws Exception {
-//         vehicle.setStatus("In Use");
-//         when(vehicleService.getVehicle("VH001")).thenReturn(vehicle);
-//         mockMvc.perform(get("/vehicles/update/VH001"))
-//                 .andExpect(status().isInternalServerError());
-//     }
+    // ----------- GET DETAIL -----------
+    @Test
+    void testViewVehicleFound() {
+        when(vehicleService.getVehicle("VEH0001")).thenReturn(vehicle);
 
-//     // ---------- updateVehicle ----------
-//     @Test
-//     void testUpdateVehicleMismatchedId() throws Exception {
-//         UpdateVehicleDto dto = new UpdateVehicleDto();
-//         dto.setId("DIFFERENT");
-//         mockMvc.perform(put("/vehicles/VH001/update")
-//                         .flashAttr("updateVehicleDto", dto))
-//                 .andExpect(status().is3xxRedirection())
-//                 .andExpect(redirectedUrl("/vehicles"));
-//     }
+        String view = vehicleController.viewVehicle("VEH0001", model);
 
-//     @Test
-//     void testUpdateVehicleBindingError() throws Exception {
-//         UpdateVehicleDto dto = new UpdateVehicleDto();
-//         dto.setId("VH001");
-//         mockMvc.perform(put("/vehicles/VH001/update")
-//                         .flashAttr("updateVehicleDto", dto)
-//                         .flashAttr("bindingResult", (BindingResult) null))
-//                 .andExpect(status().is3xxRedirection());
-//     }
+        verify(model).addAttribute("vehicle", vehicle);
+        assertEquals("vehicle/detail", view);
+    }
 
-//     @Test
-//     void testUpdateVehicleNotFound() throws Exception {
-//         when(vehicleService.updateVehicle(any())).thenReturn(null);
-//         UpdateVehicleDto dto = new UpdateVehicleDto();
-//         dto.setId("VH001");
-//         mockMvc.perform(put("/vehicles/VH001/update")
-//                         .flashAttr("updateVehicleDto", dto))
-//                 .andExpect(status().is3xxRedirection())
-//                 .andExpect(redirectedUrl("/vehicles"));
-//     }
+    @Test
+    void testViewVehicleNotFound() {
+        when(vehicleService.getVehicle("VEH9999")).thenReturn(null);
 
-//     @Test
-//     void testUpdateVehicleSuccess() throws Exception {
-//         UpdateVehicleDto dto = new UpdateVehicleDto();
-//         dto.setId("VH001");
-//         mockMvc.perform(put("/vehicles/VH001/update")
-//                         .flashAttr("updateVehicleDto", dto))
-//                 .andExpect(status().is3xxRedirection())
-//                 .andExpect(redirectedUrl("/vehicles"));
-//     }
+        String view = vehicleController.viewVehicle("VEH9999", model);
 
-//     // ---------- deleteVehicle ----------
-//     @Test
-//     void testDeleteVehicleNotFound() throws Exception {
-//         when(vehicleService.getVehicle("X")).thenReturn(null);
-//         mockMvc.perform(delete("/vehicles/X/delete"))
-//                 .andExpect(status().is3xxRedirection())
-//                 .andExpect(redirectedUrl("/vehicles"));
-//     }
+        verify(model).addAttribute("title", "Vehicle not found");
+        verify(model).addAttribute("message", "Vehicle with id VEH9999 not found");
+        assertEquals("error/404", view);
+    }
 
-//     @Test
-//     void testDeleteVehicleInUse() throws Exception {
-//         vehicle.setStatus("In Use");
-//         when(vehicleService.getVehicle("VH001")).thenReturn(vehicle);
-//         mockMvc.perform(delete("/vehicles/VH001/delete"))
-//                 .andExpect(status().is3xxRedirection())
-//                 .andExpect(redirectedUrl("/vehicles"));
-//     }
+    // ----------- CREATE FORM -----------
+    @Test
+    void testCreateVehicleForm() {
+        when(rentalVendorRepository.findAll()).thenReturn(List.of(vendor));
 
-//     @Test
-//     void testDeleteVehicleSuccess() throws Exception {
-//         mockMvc.perform(delete("/vehicles/VH001/delete"))
-//                 .andExpect(status().is3xxRedirection())
-//                 .andExpect(redirectedUrl("/vehicles"));
-//     }
+        String view = vehicleController.createVehicleForm(model);
 
-//     @Test
-//     void testDeleteVehicleNullAfterDelete() throws Exception {
-//         when(vehicleService.deleteVehicle("VH001")).thenReturn(null);
-//         mockMvc.perform(delete("/vehicles/VH001/delete"))
-//                 .andExpect(status().is3xxRedirection())
-//                 .andExpect(redirectedUrl("/vehicles"));
-//     }
-// }
+        verify(model).addAttribute(eq("vehicle"), any(CreateVehicleDto.class));
+        verify(model).addAttribute(eq("vendors"), anyList());
+        verify(model).addAttribute(eq("rentalVendorLocations"), anyMap());
+        verify(model).addAttribute("isEdit", false);
+        assertEquals("vehicle/form", view);
+    }
+
+    // ----------- CREATE VEHICLE -----------
+    @Test
+    void testCreateVehicle_Success() {
+        CreateVehicleDto dto = new CreateVehicleDto();
+        when(bindingResult.hasErrors()).thenReturn(false);
+        when(vehicleService.createVehicle(dto)).thenReturn(vehicle);
+
+        String view = vehicleController.createVehicle(dto, bindingResult, redirectAttributes, model);
+
+        verify(redirectAttributes).addFlashAttribute("successMessage", "Successfully created new vehicle.");
+        assertEquals("redirect:/vehicles", view);
+    }
+
+    @Test
+    void testCreateVehicle_BindingError() {
+        CreateVehicleDto dto = new CreateVehicleDto();
+        when(bindingResult.hasErrors()).thenReturn(true);
+
+        String view = vehicleController.createVehicle(dto, bindingResult, redirectAttributes, model);
+
+        verify(model).addAttribute(eq("errorMessage"), anyString());
+        assertEquals("vehicle/form", view);
+    }
+
+    @Test
+    void testCreateVehicle_FailedService() {
+        CreateVehicleDto dto = new CreateVehicleDto();
+        when(bindingResult.hasErrors()).thenReturn(false);
+        when(vehicleService.createVehicle(dto)).thenReturn(null);
+
+        String view = vehicleController.createVehicle(dto, bindingResult, redirectAttributes, model);
+
+        verify(model).addAttribute("errorMessage", "Failed to create new vehicle.");
+        assertEquals("vehicle/form", view);
+    }
+
+    // ----------- UPDATE FORM -----------
+    @Test
+    void testUpdateForm_Success() {
+        when(vehicleService.getVehicle("VEH0001")).thenReturn(vehicle);
+        when(rentalVendorRepository.findAll()).thenReturn(List.of(vendor));
+
+        String view = vehicleController.updateForm("VEH0001", model);
+
+        verify(model).addAttribute("vehicle", vehicle);
+        verify(model).addAttribute("vendors", List.of(vendor));
+        verify(model).addAttribute("isEdit", true);
+        verify(model).addAttribute("vehicleId", "VEH0001");
+        assertEquals("vehicle/form", view);
+    }
+
+    @Test
+    void testUpdateForm_NotFound() {
+        when(vehicleService.getVehicle("VEH9999")).thenReturn(null);
+
+        String view = vehicleController.updateForm("VEH9999", model);
+
+        verify(model).addAttribute("title", "Vehicle not found");
+        verify(model).addAttribute("message", "Vehicle with id VEH9999 not found");
+        assertEquals("error/404", view);
+    }
+
+    @Test
+    void testUpdateForm_InUse() {
+        vehicle.setStatus("In Use");
+        when(vehicleService.getVehicle("VEH0001")).thenReturn(vehicle);
+
+        assertThrows(IllegalArgumentException.class, () -> vehicleController.updateForm("VEH0001", model));
+    }
+
+    // ----------- UPDATE VEHICLE -----------
+    @Test
+    void testUpdateVehicle_Success() {
+        UpdateVehicleDto dto = new UpdateVehicleDto();
+        dto.setId("VEH0001");
+        when(bindingResult.hasErrors()).thenReturn(false);
+        when(vehicleService.updateVehicle(dto)).thenReturn(vehicle);
+
+        String view = vehicleController.updateVehicle("VEH0001", dto, bindingResult, redirectAttributes, model);
+
+        verify(redirectAttributes).addFlashAttribute("successMessage", "Successfully updated vehicle with id VEH0001.");
+        assertEquals("redirect:/vehicles", view);
+    }
+
+    @Test
+    void testUpdateVehicle_IdMismatch() {
+        UpdateVehicleDto dto = new UpdateVehicleDto();
+        dto.setId("DIFF");
+
+        String view = vehicleController.updateVehicle("VEH0001", dto, bindingResult, redirectAttributes, model);
+
+        verify(redirectAttributes).addFlashAttribute("errorMessage", "Invalid vehicle id.");
+        assertEquals("redirect:/vehicles", view);
+    }
+
+    @Test
+    void testUpdateVehicle_BindingError() {
+        UpdateVehicleDto dto = new UpdateVehicleDto();
+        dto.setId("VEH0001");
+        when(bindingResult.hasErrors()).thenReturn(true);
+
+        String view = vehicleController.updateVehicle("VEH0001", dto, bindingResult, redirectAttributes, model);
+
+        verify(redirectAttributes).addFlashAttribute("errorMessage", "Validation failed. Please check your input.");
+        assertEquals("redirect:/vehicles/update/VEH0001", view);
+    }
+
+    // ----------- DELETE VEHICLE -----------
+    @Test
+    void testDeleteVehicle_Success() {
+        when(vehicleService.getVehicle("VEH0001")).thenReturn(vehicle);
+        when(vehicleService.deleteVehicle("VEH0001")).thenReturn(vehicle);
+
+        String view = vehicleController.deleteVehicle("VEH0001", redirectAttributes);
+
+        verify(redirectAttributes).addFlashAttribute("successMessage", "Successfully delete vehicle with ID VEH0001");
+        assertEquals("redirect:/vehicles", view);
+    }
+
+    @Test
+    void testDeleteVehicle_NotFound() {
+        when(vehicleService.getVehicle("VEH9999")).thenReturn(null);
+
+        String view = vehicleController.deleteVehicle("VEH9999", redirectAttributes);
+
+        verify(redirectAttributes).addFlashAttribute("errorMessage", "Vehicle with id VEH9999 not found.");
+        assertEquals("redirect:/vehicles", view);
+    }
+
+    @Test
+    void testDeleteVehicle_InUse() {
+        vehicle.setStatus("In Use");
+        when(vehicleService.getVehicle("VEH0001")).thenReturn(vehicle);
+
+        String view = vehicleController.deleteVehicle("VEH0001", redirectAttributes);
+
+        verify(redirectAttributes).addFlashAttribute("errorMessage",
+                "Cannot delete vehicle that is currently rented or in use.");
+        assertEquals("redirect:/vehicles", view);
+    }
+}

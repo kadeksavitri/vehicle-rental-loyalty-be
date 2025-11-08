@@ -2,7 +2,6 @@ package apap.ti._5.vehicle_rental_2306203236_be.restservice;
 
 import apap.ti._5.vehicle_rental_2306203236_be.model.RentalAddOn;
 import apap.ti._5.vehicle_rental_2306203236_be.model.RentalBooking;
-import apap.ti._5.vehicle_rental_2306203236_be.model.RentalVendor;
 import apap.ti._5.vehicle_rental_2306203236_be.model.Vehicle;
 import apap.ti._5.vehicle_rental_2306203236_be.repository.RentalAddOnRepository;
 import apap.ti._5.vehicle_rental_2306203236_be.repository.RentalBookingRepository;
@@ -37,63 +36,51 @@ public class RentalBookingRestServiceImpl implements RentalBookingRestService {
         this.idGenerator = idGenerator;
     }
 
-    // -------------------------------------------------------------
-    // CREATE BOOKING
-    // -------------------------------------------------------------
-@Override
-public RentalBookingResponseDTO createRentalBooking(CreateRentalBookingRequestDTO dto) {
-    // 1️⃣ Ambil vehicle
-    Vehicle vehicle = vehicleRepository.findById(dto.getVehicleId())
-        .orElseThrow(() -> new IllegalArgumentException("Vehicle ID tidak ditemukan atau null"));
+    @Override
+    public RentalBookingResponseDTO createRentalBooking(CreateRentalBookingRequestDTO dto) {
+        Vehicle vehicle = vehicleRepository.findById(dto.getVehicleId())
+            .orElseThrow(() -> new IllegalArgumentException("Vehicle ID tidak ditemukan atau null"));
 
-    // 2️⃣ Buat ID baru
-    RentalBooking lastBooking = rentalBookingRepository.findLastestRentalBookingIncludingDeleted();
-    String newId = idGenerator.generateRentalBookingId(lastBooking != null ? lastBooking.getId() : null);
+        RentalBooking lastBooking = rentalBookingRepository.findLastestRentalBookingIncludingDeleted();
+        String newId = idGenerator.generateRentalBookingId(lastBooking != null ? lastBooking.getId() : null);
 
-    // 3️⃣ Ambil add-ons
-    List<RentalAddOn> addons = new ArrayList<>();
-    if (dto.getListOfAddOns() != null && !dto.getListOfAddOns().isEmpty()) {
-        addons = dto.getListOfAddOns().stream()
-            .map(addOnId -> rentalAddOnRepository.findById(UUID.fromString(addOnId))
-                .orElseThrow(() -> new IllegalArgumentException("Add-on dengan ID " + addOnId + " tidak ditemukan")))
-            .collect(Collectors.toList());
+        List<RentalAddOn> addons = new ArrayList<>();
+        if (dto.getListOfAddOns() != null && !dto.getListOfAddOns().isEmpty()) {
+            addons = dto.getListOfAddOns().stream()
+                .map(addOnId -> rentalAddOnRepository.findById(UUID.fromString(addOnId))
+                    .orElseThrow(() -> new IllegalArgumentException("Add-on dengan ID " + addOnId + " tidak ditemukan")))
+                .collect(Collectors.toList());
+        }
+
+        long days = Math.max(1, (long) Math.ceil(Duration.between(dto.getPickUpTime(), dto.getDropOffTime()).toHours() / 24.0));
+        double basePrice = vehicle.getPrice() * days;
+        double driverFee = dto.isIncludeDriver() ? (days * 100000) : 0;
+        double addOnTotal = addons.stream().mapToDouble(RentalAddOn::getPrice).sum();
+
+        double totalPrice = basePrice + driverFee + addOnTotal;
+
+        RentalBooking booking = RentalBooking.builder()
+            .id(newId)
+            .vehicle(vehicle)
+            .vehicleId(dto.getVehicleId())
+            .pickUpTime(dto.getPickUpTime())
+            .dropOffTime(dto.getDropOffTime())
+            .pickUpLocation(dto.getPickUpLocation())
+            .dropOffLocation(dto.getDropOffLocation())
+            .capacityNeeded(dto.getCapacityNeeded())
+            .transmissionNeeded(dto.getTransmissionNeeded())
+            .includeDriver(dto.isIncludeDriver())
+            .status("Upcoming")
+            .totalPrice(totalPrice)  
+            .listOfAddOns(addons)
+            .createdAt(LocalDateTime.now())
+            .updatedAt(LocalDateTime.now())
+            .build();
+
+        rentalBookingRepository.save(booking);
+        return convertToResponseDTO(booking);
     }
 
-    // 4️⃣ Hitung total harga
-    long days = Math.max(1, (long) Math.ceil(Duration.between(dto.getPickUpTime(), dto.getDropOffTime()).toHours() / 24.0));
-    double basePrice = vehicle.getPrice() * days;
-    double driverFee = dto.isIncludeDriver() ? (days * 100000) : 0;
-    double addOnTotal = addons.stream().mapToDouble(RentalAddOn::getPrice).sum();
-
-    double totalPrice = basePrice + driverFee + addOnTotal;
-
-    // 5️⃣ Buat objek booking
-    RentalBooking booking = RentalBooking.builder()
-        .id(newId)
-        .vehicle(vehicle)
-        .vehicleId(dto.getVehicleId())
-        .pickUpTime(dto.getPickUpTime())
-        .dropOffTime(dto.getDropOffTime())
-        .pickUpLocation(dto.getPickUpLocation())
-        .dropOffLocation(dto.getDropOffLocation())
-        .capacityNeeded(dto.getCapacityNeeded())
-        .transmissionNeeded(dto.getTransmissionNeeded())
-        .includeDriver(dto.isIncludeDriver())
-        .status("Upcoming")
-        .totalPrice(totalPrice)   // ✅ gunakan hasil kalkulasi ini
-        .listOfAddOns(addons)
-        .createdAt(LocalDateTime.now())
-        .updatedAt(LocalDateTime.now())
-        .build();
-
-    rentalBookingRepository.save(booking);
-    return convertToResponseDTO(booking);
-}
-
-
-    // -------------------------------------------------------------
-    // GET ALL BOOKINGS
-    // -------------------------------------------------------------
     @Override
     public List<RentalBookingResponseDTO> getAllRentalBookings() {
         return rentalBookingRepository.findAllByDeletedAtIsNullOrderByCreatedAtDesc()
@@ -112,9 +99,6 @@ public RentalBookingResponseDTO createRentalBooking(CreateRentalBookingRequestDT
         return bookings.stream().map(this::convertToResponseDTO).toList();
     }
 
-    // -------------------------------------------------------------
-    // GET DETAIL
-    // -------------------------------------------------------------
     @Override
     public RentalBookingResponseDTO getRentalBooking(String id) {
         RentalBooking booking = rentalBookingRepository.findByIdAndDeletedAtIsNull(id).orElse(null);
@@ -122,137 +106,121 @@ public RentalBookingResponseDTO createRentalBooking(CreateRentalBookingRequestDT
         return convertToResponseDTO(booking);
     }
 
-    // -------------------------------------------------------------
-    // UPDATE BOOKING DETAILS
-    // -------------------------------------------------------------
     @Override
-public RentalBookingResponseDTO updateRentalBookingDetails(UpdateRentalBookingRequestDTO dto) {
-    RentalBooking booking = rentalBookingRepository.findByIdAndDeletedAtIsNull(dto.getId())
-            .orElseThrow(() -> new IllegalArgumentException("Booking tidak ditemukan"));
-    if (!"Upcoming".equals(booking.getStatus()))
-        throw new IllegalStateException("Booking tidak bisa diubah, status bukan 'Upcoming'");
+    public RentalBookingResponseDTO updateRentalBookingDetails(UpdateRentalBookingRequestDTO dto) {
+        RentalBooking booking = rentalBookingRepository.findByIdAndDeletedAtIsNull(dto.getId())
+                .orElseThrow(() -> new IllegalArgumentException("Booking tidak ditemukan"));
+        if (!"Upcoming".equals(booking.getStatus()))
+            throw new IllegalStateException("Booking tidak bisa diubah, status bukan 'Upcoming'");
 
-    Vehicle vehicle = vehicleRepository.findById(dto.getVehicleId())
-            .orElseThrow(() -> new IllegalArgumentException("Vehicle tidak ditemukan"));
+        Vehicle vehicle = vehicleRepository.findById(dto.getVehicleId())
+                .orElseThrow(() -> new IllegalArgumentException("Vehicle tidak ditemukan"));
 
-    // ✅ Ambil add-ons (kalau ada di DTO)
-    List<RentalAddOn> addons = new ArrayList<>();
-    if (dto.getListOfAddOns() != null && !dto.getListOfAddOns().isEmpty()) {
-        addons = dto.getListOfAddOns().stream()
-                .map(addOnId -> rentalAddOnRepository.findById(UUID.fromString(addOnId))
-                        .orElseThrow(() -> new IllegalArgumentException("Add-on dengan ID " + addOnId + " tidak ditemukan")))
-                .collect(Collectors.toList());
-    } else {
-        // kalau tidak dikirim, pertahankan add-ons lama
-        addons = booking.getListOfAddOns() != null ? booking.getListOfAddOns() : new ArrayList<>();
+        List<RentalAddOn> addons = new ArrayList<>();
+
+        if (dto.getListOfAddOns() != null && !dto.getListOfAddOns().isEmpty()) {
+            addons = dto.getListOfAddOns().stream()
+                    .map(addOnId -> rentalAddOnRepository.findById(UUID.fromString(addOnId))
+                            .orElseThrow(() -> new IllegalArgumentException("Add-on dengan ID " + addOnId + " tidak ditemukan")))
+                    .collect(Collectors.toList());
+        }
+        booking.setListOfAddOns(addons);
+
+        booking.setVehicle(vehicle);
+        booking.setVehicleId(dto.getVehicleId());
+        booking.setPickUpLocation(dto.getPickUpLocation());
+        booking.setDropOffLocation(dto.getDropOffLocation());
+        booking.setPickUpTime(dto.getPickUpTime());
+        booking.setDropOffTime(dto.getDropOffTime());
+        booking.setCapacityNeeded(dto.getCapacityNeeded());
+        booking.setTransmissionNeeded(dto.getTransmissionNeeded());
+        booking.setIncludeDriver(dto.isIncludeDriver());
+        booking.setListOfAddOns(addons);
+
+        long days = Math.max(1, (long) Math.ceil(Duration.between(dto.getPickUpTime(), dto.getDropOffTime()).toHours() / 24.0));
+        double basePrice = vehicle.getPrice() * days;
+        double driverFee = dto.isIncludeDriver() ? (days * 100000) : 0;
+        double addOnTotal = addons.stream().mapToDouble(RentalAddOn::getPrice).sum();
+
+        booking.setTotalPrice(basePrice + driverFee + addOnTotal);
+        booking.setUpdatedAt(LocalDateTime.now());
+
+        return convertToResponseDTO(rentalBookingRepository.save(booking));
     }
 
-    booking.setVehicle(vehicle);
-    booking.setVehicleId(dto.getVehicleId());
-    booking.setPickUpLocation(dto.getPickUpLocation());
-    booking.setDropOffLocation(dto.getDropOffLocation());
-    booking.setPickUpTime(dto.getPickUpTime());
-    booking.setDropOffTime(dto.getDropOffTime());
-    booking.setCapacityNeeded(dto.getCapacityNeeded());
-    booking.setTransmissionNeeded(dto.getTransmissionNeeded());
-    booking.setIncludeDriver(dto.isIncludeDriver());
-    booking.setListOfAddOns(addons);
+    @Override
+    public RentalBookingResponseDTO updateRentalBookingStatus(String id, String newStatus) {
+        RentalBooking booking = rentalBookingRepository.findByIdAndDeletedAtIsNull(id)
+                .orElseThrow(() -> new IllegalArgumentException("Booking tidak ditemukan"));
+        Vehicle vehicle = booking.getVehicle();
+        LocalDateTime now = LocalDateTime.now();
 
-    // ✅ Hitung ulang total
-    long days = Math.max(1, (long) Math.ceil(Duration.between(dto.getPickUpTime(), dto.getDropOffTime()).toHours() / 24.0));
-    double basePrice = vehicle.getPrice() * days;
-    double driverFee = dto.isIncludeDriver() ? (days * 100000) : 0;
-    double addOnTotal = addons.stream().mapToDouble(RentalAddOn::getPrice).sum();
+        if ("Done".equals(booking.getStatus()))
+            throw new IllegalStateException("Booking sudah selesai");
+        if ("Upcoming".equals(booking.getStatus()) && "Done".equals(newStatus))
+            throw new IllegalStateException("Tidak bisa langsung ubah Upcoming ke Done");
 
-    booking.setTotalPrice(basePrice + driverFee + addOnTotal);
-    booking.setUpdatedAt(LocalDateTime.now());
+        if ("Upcoming".equals(booking.getStatus()) && "Ongoing".equals(newStatus)) {
+            boolean isTimeValid = now.isAfter(booking.getPickUpTime()) && now.isBefore(booking.getDropOffTime());
+            boolean isVehicleAvailable = "Available".equalsIgnoreCase(vehicle.getStatus());
+            boolean isLocationMatch = vehicle.getLocation().equalsIgnoreCase(booking.getPickUpLocation());
+            boolean hasOngoing = rentalBookingRepository.findAllByVehicleAndDeletedAtIsNull(vehicle)
+                    .stream().anyMatch(b -> "Ongoing".equals(b.getStatus()) && !b.getId().equals(booking.getId()));
 
-    return convertToResponseDTO(rentalBookingRepository.save(booking));
-}
+            if (!isTimeValid || !isVehicleAvailable || !isLocationMatch || hasOngoing)
+                throw new IllegalStateException("Kendaraan tidak tersedia atau waktu tidak valid");
 
-@Override
-public RentalBookingResponseDTO updateRentalBookingStatus(String id, String newStatus) {
-    RentalBooking booking = rentalBookingRepository.findByIdAndDeletedAtIsNull(id)
-            .orElseThrow(() -> new IllegalArgumentException("Booking tidak ditemukan"));
-    Vehicle vehicle = booking.getVehicle();
-    LocalDateTime now = LocalDateTime.now();
-
-    if ("Done".equals(booking.getStatus()))
-        throw new IllegalStateException("Booking sudah selesai");
-    if ("Upcoming".equals(booking.getStatus()) && "Done".equals(newStatus))
-        throw new IllegalStateException("Tidak bisa langsung ubah Upcoming ke Done");
-
-    // ✅ Upcoming → Ongoing
-    if ("Upcoming".equals(booking.getStatus()) && "Ongoing".equals(newStatus)) {
-        boolean isTimeValid = now.isAfter(booking.getPickUpTime()) && now.isBefore(booking.getDropOffTime());
-        boolean isVehicleAvailable = "Available".equalsIgnoreCase(vehicle.getStatus());
-        boolean isLocationMatch = vehicle.getLocation().equalsIgnoreCase(booking.getPickUpLocation());
-        boolean hasOngoing = rentalBookingRepository.findAllByVehicleAndDeletedAtIsNull(vehicle)
-                .stream().anyMatch(b -> "Ongoing".equals(b.getStatus()) && !b.getId().equals(booking.getId()));
-
-        if (!isTimeValid || !isVehicleAvailable || !isLocationMatch || hasOngoing)
-            throw new IllegalStateException("Kendaraan tidak tersedia atau waktu tidak valid");
-
-        booking.setStatus("Ongoing");
-        vehicle.setStatus("In Use");
-    }
-
-    // ✅ Ongoing → Done + Hitung denda
-    else if ("Ongoing".equals(booking.getStatus()) && "Done".equals(newStatus)) {
-        double penalty = 0;
-        if (now.isAfter(booking.getDropOffTime())) {
-            long minutesLate = Duration.between(booking.getDropOffTime(), now).toMinutes();
-            long hoursLate = (long) Math.ceil(minutesLate / 60.0); // 🔥 bulat ke atas
-            penalty = hoursLate * 20000;
+            booking.setStatus("Ongoing");
+            vehicle.setStatus("In Use");
         }
 
-        booking.setStatus("Done");
-        booking.setTotalPrice(booking.getTotalPrice() + penalty);
-        vehicle.setStatus("Available");
-        vehicle.setLocation(booking.getDropOffLocation());
+        else if ("Ongoing".equals(booking.getStatus()) && "Done".equals(newStatus)) {
+            double penalty = 0;
+            if (now.isAfter(booking.getDropOffTime())) {
+                long minutesLate = Duration.between(booking.getDropOffTime(), now).toMinutes();
+                long hoursLate = (long) Math.ceil(minutesLate / 60.0);
+                penalty = hoursLate * 20000;
+            }
+
+            booking.setStatus("Done");
+            booking.setTotalPrice(booking.getTotalPrice() + penalty);
+            vehicle.setStatus("Available");
+            vehicle.setLocation(booking.getDropOffLocation());
+        }
+
+        booking.setUpdatedAt(LocalDateTime.now());
+        vehicleRepository.save(vehicle);
+        return convertToResponseDTO(rentalBookingRepository.save(booking));
     }
 
-    booking.setUpdatedAt(LocalDateTime.now());
-    vehicleRepository.save(vehicle);
-    return convertToResponseDTO(rentalBookingRepository.save(booking));
-}
+    @Override
+    public RentalBookingResponseDTO updateRentalBookingAddOn(UpdateRentalBookingAddOnRequestDTO dto){
+        RentalBooking booking = rentalBookingRepository.findByIdAndDeletedAtIsNull(dto.getId())
+                .orElseThrow(() -> new IllegalArgumentException("Booking tidak ditemukan"));
+        if (!"Upcoming".equals(booking.getStatus()))
+            throw new IllegalStateException("Add-ons hanya bisa diubah saat status Upcoming");
 
-    // -------------------------------------------------------------
-    // UPDATE ADD-ONS
-    // -------------------------------------------------------------
-@Override
-public RentalBookingResponseDTO updateRentalBookingAddOn(UpdateRentalBookingAddOnRequestDTO dto){
-    RentalBooking booking = rentalBookingRepository.findByIdAndDeletedAtIsNull(dto.getId())
-            .orElseThrow(() -> new IllegalArgumentException("Booking tidak ditemukan"));
-    if (!"Upcoming".equals(booking.getStatus()))
-        throw new IllegalStateException("Add-ons hanya bisa diubah saat status Upcoming");
+        List<RentalAddOn> addons = new ArrayList<>();
+        if (dto.getListOfAddOns() != null && !dto.getListOfAddOns().isEmpty()) {
+            addons = dto.getListOfAddOns().stream()
+                    .map(addOnId -> rentalAddOnRepository.findById(UUID.fromString(addOnId))
+                            .orElseThrow(() -> new IllegalArgumentException("Add-on dengan ID " + addOnId + " tidak ditemukan")))
+                    .collect(Collectors.toList());
+        }
 
-    // ✅ Ambil add-ons berdasarkan ID dari DTO (langsung byId)
-    List<RentalAddOn> addons = new ArrayList<>();
-    if (dto.getListOfAddOns() != null && !dto.getListOfAddOns().isEmpty()) {
-        addons = dto.getListOfAddOns().stream()
-                .map(addOnId -> rentalAddOnRepository.findById(UUID.fromString(addOnId))
-                        .orElseThrow(() -> new IllegalArgumentException("Add-on dengan ID " + addOnId + " tidak ditemukan")))
-                .collect(Collectors.toList());
+        booking.setListOfAddOns(addons);
+
+        long days = Math.max(1, (long) Math.ceil(Duration.between(booking.getPickUpTime(), booking.getDropOffTime()).toHours() / 24.0));
+        double basePrice = booking.getVehicle().getPrice() * days;
+        double driverFee = booking.isIncludeDriver() ? (days * 100000) : 0;
+        double addOnTotal = addons.stream().mapToDouble(RentalAddOn::getPrice).sum();
+
+        booking.setTotalPrice(basePrice + driverFee + addOnTotal);
+        booking.setUpdatedAt(LocalDateTime.now());
+
+        return convertToResponseDTO(rentalBookingRepository.save(booking));
     }
 
-    booking.setListOfAddOns(addons);
-
-    // ✅ Hitung ulang total harga
-    long days = Math.max(1, (long) Math.ceil(Duration.between(booking.getPickUpTime(), booking.getDropOffTime()).toHours() / 24.0));
-    double basePrice = booking.getVehicle().getPrice() * days;
-    double driverFee = booking.isIncludeDriver() ? (days * 100000) : 0;
-    double addOnTotal = addons.stream().mapToDouble(RentalAddOn::getPrice).sum();
-
-    booking.setTotalPrice(basePrice + driverFee + addOnTotal);
-    booking.setUpdatedAt(LocalDateTime.now());
-
-    return convertToResponseDTO(rentalBookingRepository.save(booking));
-}
-
-    // -------------------------------------------------------------
-    // DELETE BOOKING
-    // -------------------------------------------------------------
     @Override
     public RentalBookingResponseDTO deleteRentalBooking(DeleteRentalBookingRequestDTO dto) {
         RentalBooking booking = rentalBookingRepository.findByIdAndDeletedAtIsNull(dto.getId())
@@ -273,9 +241,6 @@ public RentalBookingResponseDTO updateRentalBookingAddOn(UpdateRentalBookingAddO
         return convertToResponseDTO(booking);
     }
 
-    // -------------------------------------------------------------
-    // CHART STATISTICS
-    // -------------------------------------------------------------
     @Override
     public List<Object[]> getRentalBookingStatistics(ChartRentalBookingRequestDTO chartRequest) {
         String period = chartRequest.getPeriod();
@@ -307,9 +272,6 @@ public RentalBookingResponseDTO updateRentalBookingAddOn(UpdateRentalBookingAddO
         return result;
     }
 
-    // -------------------------------------------------------------
-    // HELPER: CONVERT ENTITY TO RESPONSE DTO
-    // -------------------------------------------------------------
     private RentalBookingResponseDTO convertToResponseDTO(RentalBooking booking) {
         if (booking == null) return null;
 

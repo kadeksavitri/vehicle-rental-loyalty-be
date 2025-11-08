@@ -4,10 +4,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.time.temporal.ChronoUnit;
 
 import org.springframework.stereotype.Service;
-
 import apap.ti._5.vehicle_rental_2306203236_be.model.Vehicle;
 import apap.ti._5.vehicle_rental_2306203236_be.model.RentalVendor;
 import apap.ti._5.vehicle_rental_2306203236_be.repository.VehicleRepository;

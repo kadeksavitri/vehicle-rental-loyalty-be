@@ -1,44 +1,91 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Vehicle Details</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 30px; background-color: #f9f9f9; }
-        .container { max-width: 700px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        h2 { text-align: center; color: #1aa546; }
-        .info-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; }
-        .buttons { text-align: center; margin-top: 20px; }
-        button { background-color: #1aa546; color: white; border: none; padding: 10px 20px; border-radius: 6px; margin: 5px; cursor: pointer; }
-        .delete { background-color: #e63946; }
-        button:hover { opacity: 0.9; }
-    </style>
+  <title>Vehicle Details</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 30px; background-color: #f9f9f9;}
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    .header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    h2 { color: #1aa546; margin: 0; font-size: 22px; }
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px 40px;
+    }
+    .info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee;}
+    .info-row b { color: #333; width: 45%;}
+    .info-row span { color: #555; text-align: right; flex: 1;}
+    .price { display: flex; justify-content: flex-end; align-items: center; gap: 4px; color: #1aa546; font-weight: 600;}
+    .buttons { display: flex; justify-content: center; gap: 10px; margin-top: 25px;}
+    button { border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; color: white; transition: 0.2s;}
+    .update { background-color: #1aa546; }
+    .update:hover { background-color: #148a3f; }
+    .delete { background-color: #e63946; }
+    .delete:hover { background-color: #c5303e; }
+    .back { background-color: #555; }
+    .back:hover { background-color: #444; }
+  </style>
 </head>
+
 <body>
 <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="container">
+  <div class="header-row">
     <h2>Vehicle Details</h2>
-    <div class="container">
-        
-        <div class="info-row"><b>ID:</b> <span th:text="${vehicle.id}"></span></div>
-        <div class="info-row"><b>Vendor:</b> <span th:text="${vehicle.rentalVendor.name}"></span></div>
-        <div class="info-row"><b>Type:</b> <span th:text="${vehicle.type}"></span></div>
-        <div class="info-row"><b>Brand:</b> <span th:text="${vehicle.brand}"></span></div>
-        <div class="info-row"><b>Model:</b> <span th:text="${vehicle.model}"></span></div>
-        <div class="info-row"><b>Year:</b> <span th:text="${vehicle.productionYear}"></span></div>
-        <div class="info-row"><b>Location:</b> <span th:text="${vehicle.location}"></span></div>
-        <div class="info-row"><b>License Plate:</b> <span th:text="${vehicle.licensePlate}"></span></div>
-        <div class="info-row"><b>Capacity:</b> <span th:text="${vehicle.capacity}"></span></div>
-        <div class="info-row"><b>Transmission:</b> <span th:text="${vehicle.transmission}"></span></div>
-        <div class="info-row"><b>Fuel Type:</b> <span th:text="${vehicle.fuelType}"></span></div>
-        <div class="info-row"><b>Price/Day:</b> Rp <span th:text="${#numbers.formatDecimal(vehicle.price, 0, 'COMMA', 2, 'POINT')}"></span></div>
-        <div class="info-row"><b>Status:</b> <span th:text="${vehicle.status}"></span></div>
-        <div class="buttons">
-            <form th:action="@{'/vehicles/' + ${vehicle.id} + '/delete'}" method="post" 
-                onsubmit="return confirm('Are you sure you want to delete this vehicle?');">
-                <input type="hidden" name="_method" value="delete" />
-                <button type="submit" class="delete">Delete Vehicle</button>
-            </form>
-            <a href="/vehicles"><button>Back</button></a>
-        </div>
+    <div>
+      <a th:href="@{'/vehicles/update/' + ${vehicle.id}}">
+        <button class="update">Update Vehicle Details</button>
+      </a>
+      <form th:action="@{'/vehicles/' + ${vehicle.id} + '/delete'}"
+            method="post"
+            style="display:inline;"
+            onsubmit="return confirm('Are you sure you want to delete this vehicle?');">
+        <input type="hidden" name="_method" value="delete"/>
+        <button type="submit" class="delete">Delete Vehicle</button>
+      </form>
     </div>
+  </div>
+
+  <div class="info-grid">
+    <div class="info-row"><b>Vehicle ID</b> <span th:text="${vehicle.id}"></span></div>
+    <div class="info-row"><b>Vendor Name</b> <span th:text="${vehicle.rentalVendor.name}"></span></div>
+    <div class="info-row"><b>Vehicle Type</b> <span th:text="${vehicle.type}"></span></div>
+    <div class="info-row"><b>Vehicle Brand</b> <span th:text="${vehicle.brand}"></span></div>
+    <div class="info-row"><b>Vehicle Model</b> <span th:text="${vehicle.model}"></span></div>
+    <div class="info-row"><b>Vehicle Production Year</b> <span th:text="${vehicle.productionYear}"></span></div>
+    <div class="info-row"><b>Location</b> <span th:text="${vehicle.location}"></span></div>
+    <div class="info-row"><b>License Plate</b> <span th:text="${vehicle.licensePlate}"></span></div>
+    <div class="info-row"><b>Capacity</b> <span th:text="${vehicle.capacity + ' orang'}"></span></div>
+    <div class="info-row"><b>Transmission</b> <span th:text="${vehicle.transmission}"></span></div>
+    <div class="info-row"><b>Fuel Type</b> <span th:text="${vehicle.fuelType}"></span></div>
+    <div class="info-row">
+      <b>Price per Day</b>
+      <div class="price">
+        <span>Rp</span>
+        <span th:text="${#numbers.formatDecimal(vehicle.price, 0, 'COMMA', 2, 'POINT')}"></span>
+      </div>
+    </div>
+    <div class="info-row"><b>Status</b> <span th:text="${vehicle.status}"></span></div>
+  </div>
+
+  <div class="buttons">
+    <a href="/vehicles">
+      <button type="button" class="back">Back</button>
+    </a>
+  </div>
+</div>
 </body>
 </html>

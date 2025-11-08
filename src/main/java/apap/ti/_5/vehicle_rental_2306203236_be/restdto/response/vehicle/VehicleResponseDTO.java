@@ -1,4 +1,4 @@
-package apap.ti._5.vehicle_rental_2306203236_be.dto.vehicle;
+package apap.ti._5.vehicle_rental_2306203236_be.restdto.response.vehicle;
 
 import java.time.LocalDateTime;
 
@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ReadVehicleDto {
+public class VehicleResponseDTO {
     private String id;
     private Integer rentalVendorId;
     private String rentalVendorName;

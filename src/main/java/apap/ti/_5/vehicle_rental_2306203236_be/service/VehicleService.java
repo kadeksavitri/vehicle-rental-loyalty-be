@@ -9,7 +9,9 @@ import apap.ti._5.vehicle_rental_2306203236_be.dto.vehicle.ReadVehicleDto;
 
 public interface VehicleService {
 
-    List<Vehicle> getAllVehicle(String keyword, String type);
+    List<Vehicle> getAllVehicleByKeywordAndType(String keyword, String type);
+
+    List<Vehicle> getAllVehicle();
 
     List<ReadVehicleDto> getAllVehicleDto(String keyword, String type);
 

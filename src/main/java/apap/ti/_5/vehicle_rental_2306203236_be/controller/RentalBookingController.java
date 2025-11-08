@@ -107,7 +107,7 @@ public class RentalBookingController {
             }
 
             // Filter kendaraan yang memenihi kriteria
-            List<Vehicle> availableVehicles = vehicleService.getAllVehicle(null, null)
+            List<Vehicle> availableVehicles = vehicleService.getAllVehicle()
                     .stream()
                     .filter(v -> {
                         RentalVendor vendor = v.getRentalVendor();
@@ -209,16 +209,16 @@ public class RentalBookingController {
         RentalBooking newBooking = rentalBookingService.createRentalBooking(dto);
 
         if(newBooking == null) {
-            model.addAttribute("errorMessage", "Failed to create new booking. Null");
+            redirectAttributes.addFlashAttribute("errorMessage", "Failed to create new booking. Null");
             return "booking/form-booking";
         }
 
-        model.addAttribute("successMessage", "Booking berhasil dibuat!");
+        redirectAttributes.addFlashAttribute("successMessage", "Booking berhasil dibuat!");
         return "redirect:/bookings";
     }
 
     @GetMapping("/{id}/update-details")
-    public String updateDetailsForm(@PathVariable String id, Model model) {
+    public String updateDetailsForm(@PathVariable String id, Model model, RedirectAttributes redirectAttributes) {
         RentalBooking rentalBooking = rentalBookingService.getRentalBooking(id);
 
         if (rentalBooking == null ) {
@@ -228,7 +228,7 @@ public class RentalBookingController {
         }  
         
         if (!"Upcoming".equals(rentalBooking.getStatus())) {
-            model.addAttribute("errorMessage", "Cannot update details, only upcoming booking.");
+            redirectAttributes.addFlashAttribute("errorMessage", "Cannot update details, only upcoming booking.");
             return "redirect:/bookings/" + id;
         }
         
@@ -265,7 +265,7 @@ public class RentalBookingController {
         }
 
         // Filter kendaraan yang memenihi kriteria
-        List<Vehicle> availableVehicles = vehicleService.getAllVehicle(null, null)
+        List<Vehicle> availableVehicles = vehicleService.getAllVehicle()
                 .stream()
                 .filter(v -> {
                     RentalVendor vendor = v.getRentalVendor();
@@ -327,24 +327,6 @@ public class RentalBookingController {
             model.addAttribute("isEdit", true);
             return "booking/form-booking";
         }
-
-        // model.addAttribute("availableVehicles", matchingScheduleVehicles);
-        // model.addAttribute("rentalBooking", dto);
-        // model.addAttribute("locations", locationService.getAllProvinces());
-
-        // // hitung harga per hari
-        // long days = Math.max(1, (long) Math.ceil((double) java.time.Duration.between(dto.getPickUpTime(), dto.getDropOffTime()).toHours() / 24));
-        // double pricePerDay = availableVehicles.isEmpty() ? 0 : availableVehicles.get(0).getPrice();
-        // double totalPrice = pricePerDay * days;
-
-        // model.addAttribute("availableVehicles", availableVehicles);
-        // model.addAttribute("rentalBooking", dto);
-        // model.addAttribute("days", days);
-        // model.addAttribute("pricePerDay", pricePerDay);
-        // model.addAttribute("totalPrice", totalPrice);
-        // model.addAttribute("locations", locationService.getAllProvinces());
-        // model.addAttribute("isEdit", true);
-        // return "booking/form-booking"; // Tidak save ke Database
 
         long days = Math.max(1, (long) Math.ceil((double) java.time.Duration.between(dto.getPickUpTime(), dto.getDropOffTime()).toHours() / 24));
 

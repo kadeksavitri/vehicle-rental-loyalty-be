@@ -193,6 +193,9 @@
                 width: 100%;
                 text-align: center;
             }
+        .alert { padding: 10px; border-radius: 4px; margin-bottom: 15px; }
+        .alert-success { background: #d4edda; color: #155724; }
+        .alert-error { background: #f8d7da; color: #721c24; }
         }
     </style>
 </head>
@@ -211,6 +214,9 @@
                 <a th:if="${canCancel}" th:href="@{'/bookings/' + ${rentalBooking.id} + '/delete'}" class="btn btn-red">Cancel Booking</a>
             </div>
         </div>
+
+        <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+        <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
 
         <div class="details-grid">
             <div>

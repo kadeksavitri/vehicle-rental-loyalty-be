@@ -82,7 +82,12 @@ public class VehicleServiceImpl implements VehicleService {
     }
 
     @Override
-    public List<Vehicle> getAllVehicle(String keyword, String type) {
+    public List<Vehicle> getAllVehicle() {
+        return vehicleRepository.findAllByDeletedAtIsNull();
+    }
+
+    @Override
+    public List<Vehicle> getAllVehicleByKeywordAndType(String keyword, String type) {
         if ((keyword == null || keyword.trim().isEmpty()) && (type == null || type.trim().isEmpty())) {
             return vehicleRepository.findAllByDeletedAtIsNull();
         }
@@ -175,30 +180,6 @@ public class VehicleServiceImpl implements VehicleService {
             rentalVendorName = vehicle.getRentalVendor().getName();
         }
 
-        String timeAgo = "Unknown time";
-        if (vehicle.getCreatedAt() != null) {
-            LocalDateTime now = LocalDateTime.now();
-            long hours = ChronoUnit.HOURS.between(vehicle.getCreatedAt(), now);
-            long days = ChronoUnit.DAYS.between(vehicle.getCreatedAt(), now);
-            long weeks = days / 7;
-            long months = days / 30;
-            long years = days / 365;
-            
-            if (hours < 1) {
-                timeAgo = "Just Now";
-            } else if (hours < 24) {
-                timeAgo = hours + " hour" + (hours > 1 ? "s" : "") + " ago";
-            } else if (days < 7) {
-                timeAgo = days + " day" + (days > 1 ? "s" : "") + " ago";
-            } else if (weeks < 4) {
-                timeAgo = weeks + " week" + (weeks > 1 ? "s" : "") + " ago";
-            } else if (months < 12) {
-                timeAgo = months + " month" + (months > 1 ? "s" : "") + " ago";
-            } else {
-                timeAgo = years + " year" + (years > 1 ? "s" : "") + " ago";
-            }
-        }
-
         return ReadVehicleDto.builder()
                 .id(vehicle.getId())
                 .rentalVendorId(vehicle.getRentalVendorId())
@@ -215,7 +196,6 @@ public class VehicleServiceImpl implements VehicleService {
                 .price(vehicle.getPrice())
                 .status(vehicle.getStatus())
                 .createdAt(vehicle.getCreatedAt())
-                .timeAgo(timeAgo)
                 .build();
     }
 

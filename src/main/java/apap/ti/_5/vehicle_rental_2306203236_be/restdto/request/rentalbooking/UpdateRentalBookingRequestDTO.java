@@ -3,6 +3,8 @@ package apap.ti._5.vehicle_rental_2306203236_be.restdto.request.rentalbooking;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.springframework.format.annotation.DateTimeFormat;
+
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -26,9 +28,11 @@ import lombok.NoArgsConstructor;
     private String vehicleId;
 
     @NotNull (message = "pickupTime is required")
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime pickUpTime;
 
     @NotNull (message = "dropOffTime is required")
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime dropOffTime;
 
     @NotBlank (message = "Pick up location is required")
@@ -47,7 +51,7 @@ import lombok.NoArgsConstructor;
     @NotNull (message = "Total price is required")
     private Double totalPrice;
 
-    private List<String> ListOfAddOns;
+    private List<String> listOfAddOns;
 
     private boolean includeDriver;
 

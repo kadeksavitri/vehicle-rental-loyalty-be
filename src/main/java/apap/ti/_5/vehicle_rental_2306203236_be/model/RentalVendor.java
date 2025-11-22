@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Data
 @Builder
@@ -33,6 +35,7 @@ public class RentalVendor {
     private List<String> listOfLocations;
 
     @OneToMany(mappedBy = "rentalVendor", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<Vehicle> listOfVehicles;
 
     @Column(name = "created_at", nullable = false, updatable = false)

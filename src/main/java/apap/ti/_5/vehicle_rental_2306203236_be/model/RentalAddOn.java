@@ -10,6 +10,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Data
 @Builder
@@ -28,6 +30,7 @@ public class RentalAddOn {
     private Double price;
 
     @ManyToMany(mappedBy = "listOfAddOns", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<RentalBooking> listOfBookings;
 
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -35,7 +38,7 @@ public class RentalAddOn {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-
+    
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();

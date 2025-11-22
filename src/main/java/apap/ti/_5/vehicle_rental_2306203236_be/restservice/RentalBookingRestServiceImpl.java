@@ -254,16 +254,20 @@ public class RentalBookingRestServiceImpl implements RentalBookingRestService {
             counts = new int[4];
             labels = new String[]{"Q1", "Q2", "Q3", "Q4"};
             for (RentalBooking booking : bookings) {
+                if (booking.getCreatedAt() == null) continue; 
                 if (booking.getCreatedAt().getYear() == year) {
-                    int q = (booking.getCreatedAt().getMonthValue() - 1) / 3;
-                    counts[q]++;
+                    int month = booking.getCreatedAt().getMonthValue();
+                    int quarterIndex = (month - 1) / 3;
+                    counts[quarterIndex]++;
                 }
             }
         } else {
             counts = new int[12];
             labels = new String[]{"January","February","March","April","May","June","July","August","September","October","November","December"};
             for (RentalBooking booking : bookings) {
-                if (booking.getCreatedAt().getYear() == year) counts[booking.getCreatedAt().getMonthValue() - 1]++;
+                if (booking.getCreatedAt() == null) continue; 
+                if (booking.getCreatedAt().getYear() == year) 
+                counts[booking.getCreatedAt().getMonthValue() - 1]++;
             }
         }
 

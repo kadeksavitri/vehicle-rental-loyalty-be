@@ -10,6 +10,8 @@ import apap.ti._5.vehicle_rental_2306203236_be.restdto.response.BaseResponseDTO;
 import apap.ti._5.vehicle_rental_2306203236_be.restdto.response.rentalbooking.RentalBookingResponseDTO;
 import apap.ti._5.vehicle_rental_2306203236_be.restservice.RentalBookingRestService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,11 +22,12 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Date;
 import java.util.List;
 
+@RequiredArgsConstructor //tambahin ini dan final 
 @RestController
 @RequestMapping("/api/bookings")
 public class RentalBookingRestController {
 
-    private RentalBookingRestService rentalBookingRestService;
+    private final RentalBookingRestService rentalBookingRestService;
 
     @GetMapping
     public ResponseEntity<BaseResponseDTO<List<RentalBookingResponseDTO>>> getAllRentalBookings(
@@ -157,6 +160,11 @@ public class RentalBookingRestController {
             baseResponse.setTimestamp(new Date());
             return ResponseEntity.ok(baseResponse);
 
+        } catch (IllegalArgumentException e) {
+            baseResponse.setStatus(HttpStatus.BAD_REQUEST.value());
+            baseResponse.setMessage("Gagal memperbarui booking: " + e.getMessage());
+            baseResponse.setTimestamp(new Date());
+            return ResponseEntity.badRequest().body(baseResponse);
         } catch (Exception e) {
             baseResponse.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
             baseResponse.setMessage("Terjadi kesalahan server: " + e.getMessage());
@@ -265,25 +273,28 @@ public ResponseEntity<BaseResponseDTO<RentalBookingResponseDTO>> deleteBooking(
 }
 
 
-    @PostMapping("/chart")
+    @GetMapping("/chart")
     public ResponseEntity<BaseResponseDTO<List<Object[]>>> getBookingChartData(
-            @RequestBody ChartRentalBookingRequestDTO chartRequest) {
-
+            @RequestParam String period,
+            @RequestParam int year) 
+    {
         var baseResponse = new BaseResponseDTO<List<Object[]>>();
-
         try {
-            List<Object[]> chartData = rentalBookingRestService.getRentalBookingStatistics(chartRequest);
-            baseResponse.setStatus(HttpStatus.OK.value());
+            ChartRentalBookingRequestDTO req = new ChartRentalBookingRequestDTO(period, year);
+            List<Object[]> chartData = rentalBookingRestService.getRentalBookingStatistics(req);
+
+            baseResponse.setStatus(200);
             baseResponse.setMessage("Data statistik booking berhasil diambil");
             baseResponse.setData(chartData);
             baseResponse.setTimestamp(new Date());
             return ResponseEntity.ok(baseResponse);
 
         } catch (Exception e) {
-            baseResponse.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            baseResponse.setStatus(500);
             baseResponse.setMessage("Gagal mengambil data chart: " + e.getMessage());
             baseResponse.setTimestamp(new Date());
             return ResponseEntity.internalServerError().body(baseResponse);
         }
     }
+
 }

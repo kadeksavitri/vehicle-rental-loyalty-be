@@ -1,4 +1,6 @@
 spring:
+    main: 
+        allow-circular-references: true
     application:
         name: vehicle-rental-2306203236-be
 
@@ -14,4 +16,7 @@ spring:
         hibernate:
             ddl-auto: create-drop
 
-
+vehicle-rental-2306203236-be:
+    app: 
+        jwtSecret: "${JWT_SECRET_KEY}"
+        jwtExpirationMs: 86400000

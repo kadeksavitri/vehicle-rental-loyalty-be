@@ -20,7 +20,7 @@ public class JwtUtils {
     @Value("${vehicle-rental-2306203236-be.app.jwtSecret}")
     private String jwtSecret;
  
-    @Value("${vehicle-retal-2306203236-be.app.jwtExpirationMs}")
+    @Value("${vehicle-rental-2306203236-be.app.jwtExpirationMs}")
     private int jwtExpirationMs;
  
     public String generateJwtToken(String id, String username, String email, String name, String role) {

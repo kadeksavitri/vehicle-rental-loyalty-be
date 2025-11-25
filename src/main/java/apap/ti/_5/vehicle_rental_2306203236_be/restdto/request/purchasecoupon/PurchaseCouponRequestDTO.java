@@ -3,8 +3,8 @@ import lombok.*;
 
 import java.util.UUID;
 
-@Getter
-@Setter
+@Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class PurchaseCouponRequestDTO {

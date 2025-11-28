@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.Date;
 import java.util.List;
@@ -23,6 +24,7 @@ public class VehicleRestController {
     @Autowired VehicleRestService vehicleRestService;
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('SUPERADMIN','RENTAL_VENDOR')")
     public ResponseEntity<BaseResponseDTO<List<VehicleResponseDTO>>> getAllVehicles(
             @RequestParam(value = "keyword", required = false) String keyword,
             @RequestParam(value = "type", required = false) String type) {
@@ -53,6 +55,7 @@ public class VehicleRestController {
         }
     }
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('SUPERADMIN','RENTAL_VENDOR')")
     public ResponseEntity<BaseResponseDTO<VehicleResponseDTO>> getVehicle(@PathVariable("id") String id) {
         var baseResponse = new BaseResponseDTO<VehicleResponseDTO>();
 
@@ -80,6 +83,7 @@ public class VehicleRestController {
     }
 
     @PostMapping("/create")
+    @PreAuthorize("hasAnyRole('SUPERADMIN','RENTAL_VENDOR')")
     public ResponseEntity<BaseResponseDTO<VehicleResponseDTO>> createVehicle(
             @Valid @RequestBody AddVehicleRequestDTO addVehicleRequestDTO,
             BindingResult bindingResult) {
@@ -122,6 +126,7 @@ public class VehicleRestController {
     }
 
     @PutMapping("/update/{id}")
+    @PreAuthorize("hasAnyRole('SUPERADMIN','RENTAL_VENDOR')")
     public ResponseEntity<BaseResponseDTO<VehicleResponseDTO>> updateVehicle(
             @PathVariable("id") String id,
             @Valid @RequestBody UpdateVehicleRequestDTO updateVehicleRequestDTO,
@@ -178,6 +183,7 @@ public class VehicleRestController {
     }
 
     @DeleteMapping("/delete/{id}")
+    @PreAuthorize("hasAnyRole('SUPERADMIN','RENTAL_VENDOR')")
     public ResponseEntity<BaseResponseDTO<VehicleResponseDTO>> deleteVehicle(@PathVariable("id") String id) {
         var baseResponse = new BaseResponseDTO<VehicleResponseDTO>();
 

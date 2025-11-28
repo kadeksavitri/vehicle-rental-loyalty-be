@@ -40,6 +40,7 @@ public class AuthProxyController {
             base.setTimestamp(new Date());
             return ResponseEntity.ok(base);
         } catch (Exception ex) {
+            ex.printStackTrace();
             base.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
             base.setMessage("Error: " + ex.getMessage());
             base.setTimestamp(new Date());

@@ -20,3 +20,6 @@ vehicle-rental-2306203236-be:
     app: 
         jwtSecret: "${JWT_SECRET_KEY}"
         jwtExpirationMs: 86400000
+
+vehicle:
+    api-key: "${VEHICLE_API_KEY:test-api-key-dev}"

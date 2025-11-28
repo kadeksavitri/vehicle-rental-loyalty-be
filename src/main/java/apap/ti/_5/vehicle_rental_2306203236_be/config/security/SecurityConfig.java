@@ -13,9 +13,11 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final ProfileClient profileClient;
+    private final apap.ti._5.vehicle_rental_2306203236_be.security.apikey.ApiKeyAuthFilter apiKeyAuthFilter;
 
-    public SecurityConfig(ProfileClient profileClient) {
+    public SecurityConfig(ProfileClient profileClient, apap.ti._5.vehicle_rental_2306203236_be.security.apikey.ApiKeyAuthFilter apiKeyAuthFilter) {
         this.profileClient = profileClient;
+        this.apiKeyAuthFilter = apiKeyAuthFilter;
     }
 
     @Bean
@@ -31,6 +33,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/public/**").permitAll()
                 .anyRequest().authenticated()
             )
+            .addFilterBefore(apiKeyAuthFilter, UsernamePasswordAuthenticationFilter.class)
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

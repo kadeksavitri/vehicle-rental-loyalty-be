@@ -1,24 +1,45 @@
 package apap.ti._5.vehicle_rental_2306203236_be.config.security;
 
+import io.netty.handler.ssl.SslContext;
+import io.netty.handler.ssl.SslContextBuilder;
+import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
-
 import reactor.core.publisher.Mono;
+import reactor.netty.http.client.HttpClient;
 
 @Component
 public class ProfileClient {
 
-    private final WebClient webClient;
+        private final WebClient webClient;
 
-    public ProfileClient(@Value("${profile.service.base-url:https://2306219575-be.hafizmuh.site}") String baseUrl) {
+        public ProfileClient(
+            @Value("${profile.service.base-url:https://2306219575-be.hafizmuh.site}") String baseUrl,
+            @Value("${profile.service.skip-ssl-validation:false}") boolean skipSslValidation
+        ) {
+        HttpClient httpClient = HttpClient.create();
+        if (skipSslValidation) {
+            // WARNING: insecure trust manager — only for development
+            try {
+                SslContext sslContext = SslContextBuilder.forClient()
+                        .trustManager(InsecureTrustManagerFactory.INSTANCE)
+                        .build();
+                httpClient = HttpClient.create().secure(spec -> spec.sslContext(sslContext));
+            } catch (Exception ex) {
+                System.err.println("Failed to build insecure SSL context: " + ex.getMessage());
+            }
+        }
+
         this.webClient = WebClient.builder()
-                .baseUrl(baseUrl)
-                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .build();
-    }
+            .clientConnector(new ReactorClientHttpConnector(httpClient))
+            .baseUrl(baseUrl)
+            .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+            .build();
+        }
 
     /**
      * Validate token by calling external profile microservice /api/auth/validate-token.
@@ -48,17 +69,37 @@ public class ProfileClient {
      */
     public LoginResponse login(LoginRequest req) {
         try {
+            // Use exchangeToMono to capture non-2xx responses and log response body for debugging
             Mono<LoginWrapper> mono = webClient.post()
                     .uri("/api/auth/login")
                     .bodyValue(req)
-                    .retrieve()
-                    .bodyToMono(LoginWrapper.class)
-                    .onErrorReturn(null);
+                    .exchangeToMono(clientResponse -> {
+                        if (clientResponse.statusCode().is2xxSuccessful()) {
+                            return clientResponse.bodyToMono(LoginWrapper.class);
+                        } else {
+                            return clientResponse.bodyToMono(String.class)
+                                    .map(body -> {
+                                        System.err.println("Profile Service login non-2xx status=" + clientResponse.statusCode() + " body=" + body);
+                                        return null;
+                                    });
+                        }
+                    })
+                    .onErrorResume(ex -> {
+                        System.err.println("Profile Service login error: " + ex.getMessage());
+                        ex.printStackTrace();
+                        return Mono.empty();
+                    });
 
             LoginWrapper wrapper = mono.block();
-            if (wrapper == null) return null;
+            if (wrapper == null) {
+                System.err.println("Profile Service login returned null wrapper or non-2xx response");
+                return null;
+            }
+            System.out.println("Profile Service login response status wrapper present");
             return wrapper.getData();
         } catch (Exception ex) {
+            System.err.println("Profile Service login exception: " + ex.getMessage());
+            ex.printStackTrace();
             return null;
         }
     }

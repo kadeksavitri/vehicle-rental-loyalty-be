@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.Date;
 import java.util.List;
@@ -30,6 +31,7 @@ public class RentalBookingRestController {
     private final RentalBookingRestService rentalBookingRestService;
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('SUPERADMIN','RENTAL_VENDOR','CUSTOMER')")
     public ResponseEntity<BaseResponseDTO<List<RentalBookingResponseDTO>>> getAllRentalBookings(
             @RequestParam(value = "keyword", required = false) String keyword) {
 
@@ -58,6 +60,7 @@ public class RentalBookingRestController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('SUPERADMIN','RENTAL_VENDOR','CUSTOMER')")
     public ResponseEntity<BaseResponseDTO<RentalBookingResponseDTO>> getRentalBooking(@PathVariable("id") String id) {
         var baseResponse = new BaseResponseDTO<RentalBookingResponseDTO>();
 
@@ -85,6 +88,7 @@ public class RentalBookingRestController {
     }
 
     @PostMapping("/create")
+    @PreAuthorize("hasAnyRole('SUPERADMIN','CUSTOMER')")
     public ResponseEntity<BaseResponseDTO<RentalBookingResponseDTO>> createRentalBooking(
             @Valid @RequestBody CreateRentalBookingRequestDTO requestDTO,
             BindingResult bindingResult) {
@@ -127,6 +131,7 @@ public class RentalBookingRestController {
     }
 
     @PutMapping("/update-details")
+    @PreAuthorize("hasAnyRole('SUPERADMIN','CUSTOMER')")
     public ResponseEntity<BaseResponseDTO<RentalBookingResponseDTO>> updateBookingDetails(
             @Valid @RequestBody UpdateRentalBookingRequestDTO dto,
             BindingResult bindingResult) {
@@ -174,6 +179,7 @@ public class RentalBookingRestController {
     }
 
     @PutMapping("/update-status")
+    @PreAuthorize("hasAnyRole('SUPERADMIN','RENTAL_VENDOR')")
     public ResponseEntity<BaseResponseDTO<RentalBookingResponseDTO>> updateBookingStatus(
             @Valid @RequestBody UpdateRentalBookingStatusRequestDTO dto,
             BindingResult bindingResult) {
@@ -215,6 +221,7 @@ public class RentalBookingRestController {
     }
 
 @PutMapping("/update-addons")
+@PreAuthorize("hasAnyRole('SUPERADMIN','CUSTOMER')")
 public ResponseEntity<BaseResponseDTO<RentalBookingResponseDTO>> updateAddOns(
         @Valid @RequestBody UpdateRentalBookingAddOnRequestDTO dto) {
 
@@ -244,6 +251,7 @@ public ResponseEntity<BaseResponseDTO<RentalBookingResponseDTO>> updateAddOns(
 }
 
 @DeleteMapping("{id}/delete")
+@PreAuthorize("hasAnyRole('SUPERADMIN','RENTAL_VENDOR','CUSTOMER')")
 public ResponseEntity<BaseResponseDTO<RentalBookingResponseDTO>> deleteBooking(
         @Valid @RequestBody DeleteRentalBookingRequestDTO dto) {
 

@@ -43,7 +43,7 @@ spec:
                   key: JWT_SECRET_KEY
             - name : CORS_ALLOWED_ORIGINS
               valueFrom:
-                configMapKeyRef:
+                secretKeyRef:
                   name: vehiclerental-2306203236-be-secret
                   key: CORS_ALLOWED_ORIGINS
             - name: API_KEY

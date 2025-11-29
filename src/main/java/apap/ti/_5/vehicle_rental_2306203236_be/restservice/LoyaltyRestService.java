@@ -10,23 +10,20 @@ import java.util.UUID;
 
 public interface LoyaltyRestService {
 
-	// Loyalty Points
 	LoyaltyAccount addPoints(UUID customerId, Integer points);
+	
 	LoyaltyAccount getAccount(UUID customerId);
 
-	// Coupon CRUD
 	Coupon createCoupon(Coupon coupon);
 	List<Coupon> getAllCoupons();
+
 	Coupon getCouponById(UUID id);
 
 	Coupon updateCoupon(UUID id, UpdateCouponRequestDTO request);
 
-	// Purchase Coupon
 	PurchasedCoupon purchaseCoupon(UUID customerId, UUID couponId);
 
-	// Use Coupon (Bill Service)
 	Integer useCoupon(String code, UUID customerId);
 
-	// Purchased Coupons
 	List<PurchasedCoupon> getPurchasedCoupons(UUID customerId);
 }

@@ -20,13 +20,16 @@ public class PurchasedCoupon {
     @GeneratedValue
     private UUID id;
 
-    private String code;   // Wajib unik
+    @Column(name = "code", nullable = false)
+    private String code;   
 
+    @Column(name = "customer_id", nullable = false)
     private UUID customerId;
 
+    @Column(name = "coupon_id", nullable = false)
     private UUID couponId;
 
     private LocalDateTime purchasedDate = LocalDateTime.now();
 
-    private LocalDateTime usedDate;   // null jika belum dipakai
+    private LocalDateTime usedDate;   // null kalau belum dipakai
 }

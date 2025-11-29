@@ -41,7 +41,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (token != null) {
             var profile = profileClient.validateToken(token);
             if (profile == null) {
-                // validation call failed or returned null — try to parse JWT locally as a fallback for local debugging
                 try {
                     profile = parseProfileFromJwt(token);
                     if (profile != null) {
@@ -56,7 +55,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 String rawRole = profile.getRole() != null ? profile.getRole().toUpperCase().replace(' ', '_') : "CUSTOMER";
                 String authority = "ROLE_" + rawRole;
 
-                // set the profile object itself as principal so services can access userId and other fields
                 var auth = new UsernamePasswordAuthenticationToken(profile, null,
                         Collections.singletonList(new SimpleGrantedAuthority(authority)));
                 SecurityContextHolder.getContext().setAuthentication(auth);

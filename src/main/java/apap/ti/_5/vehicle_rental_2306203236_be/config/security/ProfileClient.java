@@ -18,7 +18,7 @@ public class ProfileClient {
         private final WebClient webClient;
 
         public ProfileClient(
-            @Value("${profile.service.base-url:https://2306219575-be.hafizmuh.site}") String baseUrl,
+            @Value("${profile.service.base-url:http://2306219575-be.hafizmuh.site}") String baseUrl,
             @Value("${profile.service.skip-ssl-validation:false}") boolean skipSslValidation
         ) {
         HttpClient httpClient = HttpClient.create();
@@ -92,8 +92,42 @@ public class ProfileClient {
 
             LoginWrapper wrapper = mono.block();
             if (wrapper == null) {
-                System.err.println("Profile Service login returned null wrapper or non-2xx response");
-                return null;
+                System.err.println("Profile Service login returned null wrapper or non-2xx response — attempting fallback with 'email' field");
+                try {
+                    java.util.Map<String, String> fallback = new java.util.HashMap<>();
+                    fallback.put("email", req.getUsername());
+                    fallback.put("password", req.getPassword());
+
+                    Mono<LoginWrapper> mono2 = webClient.post()
+                            .uri("/api/auth/login")
+                            .bodyValue(fallback)
+                            .exchangeToMono(clientResponse -> {
+                                if (clientResponse.statusCode().is2xxSuccessful()) {
+                                    return clientResponse.bodyToMono(LoginWrapper.class);
+                                } else {
+                                    return clientResponse.bodyToMono(String.class)
+                                            .map(body -> {
+                                                System.err.println("Profile Service fallback login non-2xx status=" + clientResponse.statusCode() + " body=" + body);
+                                                return null;
+                                            });
+                                }
+                            })
+                            .onErrorResume(ex -> {
+                                System.err.println("Profile Service fallback login error: " + ex.getMessage());
+                                ex.printStackTrace();
+                                return Mono.empty();
+                            });
+
+                    wrapper = mono2.block();
+                    if (wrapper == null) {
+                        System.err.println("Profile Service fallback login also returned null");
+                        return null;
+                    }
+                } catch (Exception ex) {
+                    System.err.println("Profile Service fallback login exception: " + ex.getMessage());
+                    ex.printStackTrace();
+                    return null;
+                }
             }
             System.out.println("Profile Service login response status wrapper present");
             return wrapper.getData();
@@ -148,7 +182,6 @@ public class ProfileClient {
         public void setRole(String role) { this.role = role; }
     }
 
-    // wrapper matching the profile microservice response
     public static class ProfileValidateWrapper {
         private Integer status;
         private String message;

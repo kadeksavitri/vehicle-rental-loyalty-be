@@ -142,9 +142,7 @@ public class LoyaltyRestController {
 		.data(dto)
 		.build();
     }
-    // ------------------------------------------------
-    // PURCHASE COUPON (customer beli kupon)
-    // ------------------------------------------------
+
     @PostMapping("/purchase/{customerId}")
     @PreAuthorize("hasRole('CUSTOMER')")
     public BaseResponseDTO<PurchasedCouponResponseDTO> purchase(
@@ -169,9 +167,8 @@ public class LoyaltyRestController {
 		.build();
     }
 
-    // ------------------------------------------------
-    // USE COUPON (dipakai Bill Service)
-    // ------------------------------------------------
+
+	// digunain di bill service
     @PostMapping("/use")
     @PreAuthorize("hasRole('API_KEY')")
     public BaseResponseDTO<Integer> useCoupon(@RequestBody UseCouponRequestDTO request) {
@@ -188,9 +185,6 @@ public class LoyaltyRestController {
 		.build();
     }
 
-    // ------------------------------------------------
-    // GET PURCHASED COUPONS
-    // ------------------------------------------------
     @GetMapping("/purchased/{customerId}")
     @PreAuthorize("hasRole('CUSTOMER')")
     public BaseResponseDTO<List<PurchasedCouponResponseDTO>> getPurchased(@PathVariable UUID customerId) {

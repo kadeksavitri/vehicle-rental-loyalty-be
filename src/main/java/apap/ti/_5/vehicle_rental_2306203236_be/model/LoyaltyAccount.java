@@ -19,7 +19,7 @@ import java.util.UUID;
 public class LoyaltyAccount {
 
     @Id
-    private UUID customerId;   // Sama persis dengan ID customer dari Profile Service
+    private UUID customerId;  
 
     @Column(nullable = false)
     private Integer points = 0;

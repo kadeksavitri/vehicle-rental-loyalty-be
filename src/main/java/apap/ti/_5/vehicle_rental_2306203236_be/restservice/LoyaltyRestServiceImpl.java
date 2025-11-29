@@ -87,20 +87,16 @@ public class LoyaltyRestServiceImpl implements LoyaltyRestService {
 		LoyaltyAccount acc = getAccount(customerId);
 		Coupon coupon = getCouponById(couponId);
 
-		// cek saldo cukup?
 		if (acc.getPoints() < coupon.getPoints()) {
 			throw new RuntimeException("Poin tidak mencukupi");
 		}
 
-		// kurangi poin
 		acc.setPoints(acc.getPoints() - coupon.getPoints());
 		acc.setUpdatedAt(LocalDateTime.now());
 		loyaltyAccountRepository.save(acc);
 
-		// generate kode unik
 		String code = generateCouponCode(customerId, coupon);
 
-		// simpan purchased coupon
 		PurchasedCoupon pc = new PurchasedCoupon();
 		pc.setCode(code);
 		pc.setCouponId(couponId);
@@ -118,18 +114,14 @@ public class LoyaltyRestServiceImpl implements LoyaltyRestService {
 		if (pc == null)
 			return 0;
 
-		// validasi milik customer?
 		if (!pc.getCustomerId().equals(customerId))
 			return 0;
 
-		// cek sudah digunakan?
 		if (pc.getUsedDate() != null)
 			return 0;
 
-		// cari percentOff
 		Coupon coupon = getCouponById(pc.getCouponId());
 
-		// update status digunakan
 		pc.setUsedDate(LocalDateTime.now());
 		purchasedCouponRepository.save(pc);
 

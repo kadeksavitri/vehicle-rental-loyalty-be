@@ -20,12 +20,16 @@ public class Coupon {
     @GeneratedValue
     private UUID id;
 
+    @Column(name = "name", nullable = false)
     private String name;
 
+    @Column(name = "description", nullable = false)
     private String description;
 
+    @Column(name = "points", nullable = false)
     private Integer points;    
 
+    @Column(name = "percent_off", nullable = false)
     private Integer percentOff;
 
     private LocalDateTime createdDate = LocalDateTime.now();

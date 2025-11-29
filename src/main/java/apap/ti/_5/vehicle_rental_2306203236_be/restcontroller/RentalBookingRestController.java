@@ -23,7 +23,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import java.util.Date;
 import java.util.List;
 
-@RequiredArgsConstructor //tambahin ini dan final 
+@RequiredArgsConstructor  
 @RestController
 @RequestMapping("/api/bookings")
 public class RentalBookingRestController {

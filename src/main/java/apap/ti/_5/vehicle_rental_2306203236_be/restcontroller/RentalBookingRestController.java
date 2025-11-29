@@ -283,8 +283,8 @@ public ResponseEntity<BaseResponseDTO<RentalBookingResponseDTO>> deleteBooking(
 
     @GetMapping("/chart")
     public ResponseEntity<BaseResponseDTO<List<Object[]>>> getBookingChartData(
-            @RequestParam String period,
-            @RequestParam int year) 
+            @RequestParam(name = "period") String period,
+            @RequestParam(name = "year") int year) 
     {
         var baseResponse = new BaseResponseDTO<List<Object[]>>();
         try {

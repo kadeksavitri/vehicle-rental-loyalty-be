@@ -20,13 +20,14 @@ import java.util.Collections;
 public class ApiKeyAuthFilter extends OncePerRequestFilter {
 
 	// @Value("${vehicle.api-key:test-api-key-dev}") test
-	@Value("${vehicle.api-key}")
+	//@Value("${vehicle.api-key}")
+	@Value("${API_KEY}")
 	private String expectedApiKey;
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request,
-								HttpServletResponse response,
-								FilterChain filterChain)
+								    HttpServletResponse response,
+								    FilterChain filterChain)
 			throws ServletException, IOException {
 
 		String apiKey = request.getHeader("X-API-KEY");

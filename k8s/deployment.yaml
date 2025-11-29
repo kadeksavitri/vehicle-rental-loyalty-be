@@ -36,5 +36,20 @@ spec:
                 secretKeyRef:
                   name: vehiclerental-2306203236-be-secret
                   key: DATABASE_PASSWORD
+            - name: JWT_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: vehiclerental-2306203236-be-secret
+                  key: JWT_SECRET_KEY
+            - name : CORS_ALLOWED_ORIGINS
+              valueFrom:
+                configMapKeyRef:
+                  name: vehiclerental-2306203236-be-secret
+                  key: CORS_ALLOWED_ORIGINS
+            - name: API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: vehiclerental-2306203236-be-secret
+                  key: API_KEY
             - name: PROFILE_SERVICE_BASE_URL
               value: "https://2306219575-be.hafizmuh.site"

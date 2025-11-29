@@ -24,7 +24,7 @@ public class ApiKeyAuthFilter extends OncePerRequestFilter {
 	@Value("${API_KEY}")
 	private String expectedApiKey;
 
-	
+
 	@Override
 	protected void doFilterInternal(HttpServletRequest request,
 								    HttpServletResponse response,
@@ -41,6 +41,7 @@ public class ApiKeyAuthFilter extends OncePerRequestFilter {
 							Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + SecurityRoles.API_KEY))
 					);
 
+					
 			auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 			SecurityContextHolder.getContext().setAuthentication(auth);
 		}

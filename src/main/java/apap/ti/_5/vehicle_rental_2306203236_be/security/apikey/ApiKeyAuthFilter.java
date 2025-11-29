@@ -19,7 +19,8 @@ import java.util.Collections;
 @Component
 public class ApiKeyAuthFilter extends OncePerRequestFilter {
 
-	@Value("${vehicle.api-key:test-api-key-dev}")
+	// @Value("${vehicle.api-key:test-api-key-dev}") test
+	@Value("${vehicle.api-key}")
 	private String expectedApiKey;
 
 	@Override
@@ -41,6 +42,8 @@ public class ApiKeyAuthFilter extends OncePerRequestFilter {
 			auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 			SecurityContextHolder.getContext().setAuthentication(auth);
 		}
+
+		System.out.println("[API KEY CHECK] expected=" + expectedApiKey);
 
 		filterChain.doFilter(request, response);
 	}

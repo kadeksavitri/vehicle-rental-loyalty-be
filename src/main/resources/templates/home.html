@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Vehicle Rental App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f6fff8;
+            margin: 0;
+            padding: 0;
+        }
+        nav {
+            background-color: #1aa546;
+            color: white;
+            padding: 12px 30px;
+            display: flex;
+            justify-content: space-between;
+        }
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin: 0 10px;
+            font-weight: bold;
+        }
+        .container {
+            text-align: center;
+            margin-top: 80px;
+        }
+        .card {
+            display: inline-block;
+            background: white;
+            padding: 25px 60px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 30px;
+        }
+        .stats div {
+            background-color: #f0fdfa;
+            border-radius: 10px;
+            padding: 15px;
+            width: 150px;
+        }
+        button {
+            background-color: #1aa546;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            margin: 10px;
+            cursor: pointer;
+        }
+        button:hover { background-color: #1aa546; }
+    </style>
+</head>
+<body>
+    <nav>
+        <div><b>Vehicle Rental App</b></div>
+        <div>
+            <a href="/" >Home</a>
+            <a href="/vehicles">Vehicles</a>
+            <a href="/bookings">Bookings</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="card">
+            <h2>Welcome to <span style="color:#1aa546;">Vehicle Rentals</span></h2>
+            <p>Find and book your ideal vehicle easily. Quick, reliable, and ready for your next adventure.</p>
+
+            <h3>Platform Statistics</h3>
+            <div class="stats">
+                <div>
+                    <h4>Registered Vehicles</h4>
+                    <p th:text="${vehicleCount}"></p>
+                </div>
+                <div>
+                    <h4>Registered Vendors</h4>
+                    <p th:text="${vendorCount}"></p>
+                </div>
+                <div>
+                    <h4>Bookings Made</h4>
+                    <p th:text="${bookingCount}"></p>
+                </div>
+            </div>
+
+            <div>
+                <a href="/vehicles"><button>See Vehicles</button></a>
+                <a href="/bookings"><button>Book Rentals</button></a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

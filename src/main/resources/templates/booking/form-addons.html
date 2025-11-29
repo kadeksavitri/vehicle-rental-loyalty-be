@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="${isEdit} ? 'Update Booking Add-Ons' : 'Create a New Booking - Add-Ons'"></title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f6f8fa; margin: 0; padding: 0;}
+        .container { width: 45%; background-color: #ffffff; margin: 50px auto; padding: 35px 45px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);}
+        h2 { color: #1aa546; font-size: 20px; font-weight: bold; margin-bottom: 10px;}
+        h2::after { content: ""; display: block; width: 100%; height: 2px; background-color: #1aa546; margin-top: 6px; border-radius: 4px;}
+        p { color: #333; font-weight: bold; margin-top: 25px; margin-bottom: 15px;}
+        .addon-item { display: flex; justify-content: space-between; align-items: center; border: 1px solid #e0e0e0; border-radius: 6px; padding: 12px 16px; margin-bottom: 10px; transition: background 0.2s; background-color: #fff;}
+        .addon-item:hover { background-color: #f9fdfb;}
+        label { display: flex; align-items: center; gap: 8px; font-weight: 500; color: #333; cursor: pointer;}
+        input[type="checkbox"] { width: 18px; height: 18px; accent-color: #1aa546; cursor: pointer;}
+        .price { font-weight: bold; color: #1aa546; font-size: 14px;}
+        .btn-container { display: flex; justify-content: space-between; margin-top: 30px; gap: 10px;}
+        .btn { flex: 1; border: none; border-radius: 8px; padding: 12px 20px; font-weight: bold; cursor: pointer; text-align: center; transition: all 0.2s ease; font-size: 14px;}
+        .btn-secondary { background-color: #7a7a7a; color: white;}
+        .btn-secondary:hover { background-color: #5f5f5f;}
+        .btn-success { background-color: #1aa546; color: white;}
+        .btn-success:hover { background-color: #007f66;}
+        @media (max-width: 900px) { .container { width: 80%; padding: 25px; }}
+        @media (max-width: 600px) { .btn-container { flex-direction: column; } .btn { width: 100%; }}
+    </style>
+</head>
+
+<body>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="container">
+    <form th:action="${isEdit} ? @{'/bookings/update-addons'} : @{/bookings/create/save}" th:object="${rentalBooking}" method="post">
+        <h2 th:text="${isEdit} ? 'Update Booking Add-Ons' : 'Create a New Booking'"></h2>
+        <input type="hidden" name="_method" value="put" th:if="${isEdit}"/>
+        <input type="hidden" th:field="*{id}" th:value="${bookingId}" th:if="${isEdit}" />
+        <p>Choose Add-Ons</p>
+
+        <input type="hidden" th:field="*{vehicleId}" />
+        <input type="hidden" th:field="*{pickUpTime}" />
+        <input type="hidden" th:field="*{dropOffTime}" />
+        <input type="hidden" th:field="*{pickUpLocation}" />
+        <input type="hidden" th:field="*{dropOffLocation}" />
+        <input type="hidden" th:field="*{capacityNeeded}" />
+        <input type="hidden" th:field="*{transmissionNeeded}" />
+        <input type="hidden" th:field="*{includeDriver}" />
+
+        <div th:each="addon : ${addons}" class="addon-item">
+            <label>
+                <input type="checkbox" th:value="${addon.id}" th:field="*{listOfAddOns}" />
+                <span th:text="${addon.name}"></span>
+            </label>
+            <span class="price" th:text="'Rp ' + ${#numbers.formatDecimal(addon.price, 0, 'COMMA', 0, 'POINT')}"></span>
+        </div>
+
+        <div class="btn-container">
+            <a href="/bookings/create" class="btn btn-secondary">Previous</a>
+            <button type="submit" class="btn btn-success">Save</button>
+        </div>
+    </form>
+</div>
+</body>
+</html>

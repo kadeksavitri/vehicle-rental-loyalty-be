@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+ <title>All Bookings</title>
+ <link rel="stylesheet" th:href="@{/css/datatables.min.css}">
+ <script th:src="@{/js/datatables.min.js}"></script>
+
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #fafafa; margin: 0; padding: 0;}
+        .container { width: 90%; margin: 40px auto; background-color: #fff; padding: 25px 35px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);}
+        h1 { color: #1aa546; text-align: center;}
+        .btn { text-decoration: none; border: none; border-radius: 6px; padding: 8px 14px; cursor: pointer;;}
+        .btn-success { background-color: #1aa546; color: white;}
+        .btn-success:hover { background-color: #1aa546;}
+        .btn-info { background-color: #17a2b8; color: white;}
+        .btn-info:hover { background-color: #117a8b;}
+        table { width: 100%; border-collapse: collapse; background-color: white; margin-top: 15px; box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);}
+        th, td { text-align: center; padding: 12px; border-bottom: 1px solid #ddd;}
+        th { background-color: #f0f0f0; color: rgb(55, 55, 55); font-weight: bold; font-size: 14px;}
+        tr:hover { background-color: #f5f5f5;}
+        .table-container { overflow-x: auto;}
+        .alert { padding: 10px; border-radius: 4px; margin-bottom: 15px; }.alert-success { background: #d4edda; color: #155724; }.alert-error { background: #f8d7da; color: #721c24; }
+
+    </style>
+</head>
+
+<body>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+    <h1>Booking List</h1>
+
+    <div class="container">
+        <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+        <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
+
+        <div class="d-flex justify-content-between mb-3" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; margin-top: 15px;">
+            <div>
+                <a href="/bookings/create" class="btn btn-success">Create A New Booking</a>
+                <a href="/bookings/chart" class="btn btn-info">Statistics</a>
+            </div>
+        </div>
+
+
+        <div class="table-container">
+            <table id="bookingTable">
+                <thead>
+                <tr>
+                    <th>No</th>
+                    <th>ID</th>
+                    <th>Vehicle ID</th>
+                    <th>Pick-Up Time</th>
+                    <th>Drop-Off Time</th>
+                    <th>Pick-Up Location</th>
+                    <th>Status</th>
+                    <th>Total Price</th>
+                    <th>Action</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="booking, stat : ${rentalBookings}">
+                    <td th:text="${stat.count}"></td>
+                    <td th:text="${booking.id}"></td>
+                    <td th:text="${booking.vehicleId}"></td>
+                    <td th:text="${#temporals.format(booking.pickUpTime, 'MMMM dd, yyyy HH:mm')}"></td>
+                    <td th:text="${#temporals.format(booking.dropOffTime, 'MMMM dd, yyyy HH:mm')}"></td>
+                    <td th:text="${booking.pickUpLocation}"></td>
+                    <td th:text="${booking.status}"></td>
+                    <td th:text="'Rp ' + ${#numbers.formatDecimal(booking.totalPrice, 0, 'COMMA', 2, 'POINT')}"></td>
+                    <td>
+                        <a th:href="@{'/bookings/' + ${booking.id}}" class="btn btn-success btn-sm">Detail</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            $('#bookingTable').DataTable();
+        });
+    </script>
+</body>
+</html>

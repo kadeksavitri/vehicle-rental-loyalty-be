@@ -1,0 +1,30 @@
+package apap.ti._5.vehicle_rental_2306203236_be.dto.booking;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class ReadRentalBookingDto {
+    private String id;
+    private String vehicleId;
+    private String vehicleType;
+    private String vehicleBrand;
+    private LocalDateTime pickUpTime;
+    private LocalDateTime dropOffTime;
+    private String pickUpLocation;
+    private String dropOffLocation;
+    private Integer capacityNeeded;
+    private String transmissionNeeded;
+    private boolean includeDriver; 
+    private String status;
+    private Double totalPrice;
+    private List<String> ListOfAddOns;
+}

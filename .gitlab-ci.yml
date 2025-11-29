@@ -51,7 +51,7 @@ deploy:
   before_script:
     - apk add --no-cache openssh bash
     - mkdir -p ~/.ssh
-    - echo "$EC2_SSH_KEY" | base64 -d > ~/.ssh/id_rsa
+    - cp "$EC2_SSH_KEY" ~/.ssh/id_rsa
     - chmod 600 ~/.ssh/id_rsa
     - ssh-keyscan -H "$EC2_HOST" >> ~/.ssh/known_hosts
   script:

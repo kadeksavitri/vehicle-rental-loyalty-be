@@ -24,7 +24,6 @@ public class ApiKeyAuthFilter extends OncePerRequestFilter {
 	@Value("${API_KEY}")
 	private String expectedApiKey;
 
-
 	@Override
 	protected void doFilterInternal(HttpServletRequest request,
 								    HttpServletResponse response,

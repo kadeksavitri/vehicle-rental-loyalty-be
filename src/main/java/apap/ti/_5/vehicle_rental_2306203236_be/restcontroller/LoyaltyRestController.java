@@ -46,7 +46,6 @@ public class LoyaltyRestController {
     }
 
     @PostMapping("/points/add/{customerId}")
-    @PreAuthorize("hasRole('API_KEY')")
     public BaseResponseDTO<LoyaltyAccountResponseDTO> addPoints(
 	    @PathVariable UUID customerId,
 	    @RequestParam Integer points
@@ -170,7 +169,6 @@ public class LoyaltyRestController {
 
 	// digunain di bill service
     @PostMapping("/use")
-    @PreAuthorize("hasRole('API_KEY')")
     public BaseResponseDTO<Integer> useCoupon(@RequestBody UseCouponRequestDTO request) {
 
 	Integer percent = loyaltyRestService.useCoupon(

@@ -293,8 +293,10 @@ public class VehicleRestServiceImpl implements VehicleRestService {
         // Get all vehicles
         List<Vehicle> allVehicles = vehicleRepository.findAll();
 
-        // Calculate days for the requested period
-        long days = Math.max(1, Duration.between(searchRequest.getPickUpTime(), searchRequest.getDropOffTime()).toDays());
+        // Calculate days for the requested period (round up partial days)
+        long seconds = Duration.between(searchRequest.getPickUpTime(), searchRequest.getDropOffTime()).getSeconds();
+        long secondsPerDay = 24 * 60 * 60;
+        long days = seconds <= 0 ? 1 : (seconds + secondsPerDay - 1) / secondsPerDay;
 
         // Filter and map vehicles
         return allVehicles.stream()

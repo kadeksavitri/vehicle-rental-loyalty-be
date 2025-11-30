@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -162,7 +161,7 @@ public class DataLoader implements CommandLineRunner {
             for (int i = 0; i < MIN_VEHICLES_PER_VENDOR; i++) {
                 String[] data = vehicleData[vehicleIndex % vehicleData.length];
                 
-                String vehicleId = "VEH-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+                String vehicleId = String.format("VEH%04d", vehicleIndex + 1);
                 
                 Vehicle vehicle = Vehicle.builder()
                     .id(vehicleId)
@@ -197,7 +196,7 @@ public class DataLoader implements CommandLineRunner {
         
         for (int i = 0; i < MIN_BOOKINGS; i++) {
             Vehicle vehicle = vehicles.get(i % vehicles.size());
-            String bookingId = "BKG-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+            String bookingId = String.format("VR%06d", i + 1);
             
             LocalDateTime pickUpTime = LocalDateTime.now().plusDays(i - 5);
             LocalDateTime dropOffTime = pickUpTime.plusDays(2 + (i % 3));

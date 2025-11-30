@@ -1,7 +1,9 @@
 package apap.ti._5.vehicle_rental_2306203236_be.restservice;
 
 import apap.ti._5.vehicle_rental_2306203236_be.restdto.request.vehicle.AddVehicleRequestDTO;
+import apap.ti._5.vehicle_rental_2306203236_be.restdto.request.vehicle.SearchAvailableVehicleRequestDTO;
 import apap.ti._5.vehicle_rental_2306203236_be.restdto.request.vehicle.UpdateVehicleRequestDTO;
+import apap.ti._5.vehicle_rental_2306203236_be.restdto.response.vehicle.AvailableVehicleResponseDTO;
 import apap.ti._5.vehicle_rental_2306203236_be.restdto.response.vehicle.VehicleResponseDTO;
 
 import java.util.List;
@@ -19,5 +21,7 @@ public interface VehicleRestService {
     VehicleResponseDTO updateVehicle(UpdateVehicleRequestDTO updateVehicleRequestDTO);
 
     VehicleResponseDTO deleteVehicle(String id);
+
+    List<AvailableVehicleResponseDTO> searchAvailableVehicles(SearchAvailableVehicleRequestDTO searchRequest);
     
 }

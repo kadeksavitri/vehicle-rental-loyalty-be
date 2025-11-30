@@ -12,8 +12,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
-
-
 // import apap.ti._5.vehicle_rental_2306203236_be.restdto.request.*;
 // import apap.ti._5.vehicle_rental_2306203236_be.restdto.response.*;
 // import apap.ti._5.vehicle_rental_2306203236_be.restservice.RentalBookingRestService;

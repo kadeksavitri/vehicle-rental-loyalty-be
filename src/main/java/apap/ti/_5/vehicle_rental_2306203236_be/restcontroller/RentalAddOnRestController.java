@@ -16,7 +16,7 @@ public class RentalAddOnRestController {
     private final RentalAddOnRepository rentalAddOnRepository;
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('SUPERADMIN','RENTAL_VENDOR')")
+    @PreAuthorize("hasAnyRole('SUPERADMIN','RENTAL_VENDOR', 'CUSTOMER')")
     public List<RentalAddOn> getAllAddOns() {
         return rentalAddOnRepository.findAll();
     }

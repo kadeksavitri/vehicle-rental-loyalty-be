@@ -22,5 +22,5 @@ vehicle-rental-2306203236-be:
         jwtExpirationMs: 86400000
 
 vehicle:
-  api-key: ${API_KEY_APAP}
-    # api-key: "${VEHICLE_API_KEY:test-api-key-dev}" test
+#   api-key: ${API_KEY_APAP}
+    api-key: "${VEHICLE_API_KEY:test-api-key-dev}" #test

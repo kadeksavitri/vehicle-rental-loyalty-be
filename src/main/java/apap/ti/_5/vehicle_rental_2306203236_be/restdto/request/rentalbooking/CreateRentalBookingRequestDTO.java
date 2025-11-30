@@ -20,6 +20,9 @@ import org.springframework.format.annotation.DateTimeFormat;
 @NoArgsConstructor
 public class CreateRentalBookingRequestDTO {
 
+    @NotNull (message = "customerId is required")
+    private String customerId;
+
     @NotNull (message = "vehicleId is required")
     private String vehicleId;
 

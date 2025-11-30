@@ -14,6 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 public class RentalBookingResponseDTO {
     private String id;
+    private String customerId;
     private String vehicleId;
     private String vehicleBrand;
     private String vehicleType;

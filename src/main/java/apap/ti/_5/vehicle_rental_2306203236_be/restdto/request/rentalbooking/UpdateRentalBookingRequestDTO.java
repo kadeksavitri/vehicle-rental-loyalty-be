@@ -24,6 +24,9 @@ import lombok.NoArgsConstructor;
     @NotNull (message = "id is required")
     private String id;
 
+    @NotNull (message = "customerId is required")
+    private String customerId;
+
     @NotNull (message = "vehicleId is required")
     private String vehicleId;
 

@@ -27,6 +27,7 @@ public class AuthProxyController {
                 base.setStatus(HttpStatus.UNAUTHORIZED.value());
                 base.setMessage("Invalid credentials or profile service error");
                 base.setTimestamp(new Date());
+                
                 return new ResponseEntity<>(base, HttpStatus.UNAUTHORIZED);
             }
 

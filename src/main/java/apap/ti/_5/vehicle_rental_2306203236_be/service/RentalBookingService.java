@@ -15,7 +15,7 @@
 
 //     List<ReadRentalBookingDto> getAllRentalBookingDto(String keyword);
 
-//     RentalBooking getRentalBooking(String id);
+//     RentalBooking getRentalBooking(String id); 
 
 //     RentalBooking createRentalBooking(CreateRentalBookingDto createRentalBookingDto);
 

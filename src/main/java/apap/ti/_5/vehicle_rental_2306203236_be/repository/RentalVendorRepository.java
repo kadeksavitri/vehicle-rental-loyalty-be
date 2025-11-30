@@ -6,5 +6,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface RentalVendorRepository extends JpaRepository<RentalVendor, Integer> {
+    RentalVendor findByEmail(String email);
 }
 

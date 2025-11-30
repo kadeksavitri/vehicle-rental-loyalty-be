@@ -24,4 +24,7 @@ public interface VehicleRepository extends JpaRepository<Vehicle, String> {
 
     @Query(value = "SELECT * FROM vehicles ORDER BY id DESC LIMIT 1", nativeQuery = true)
     Vehicle findLatestVehicleIncludingDeleted();
+    
+    // Find vehicles by vendor
+    List<Vehicle> findAllByRentalVendorIdAndDeletedAtIsNull(Integer vendorId);
 }

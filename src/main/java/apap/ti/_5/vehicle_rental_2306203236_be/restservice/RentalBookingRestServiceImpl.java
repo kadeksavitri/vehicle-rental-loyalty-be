@@ -1,13 +1,16 @@
 package apap.ti._5.vehicle_rental_2306203236_be.restservice;
 
+import apap.ti._5.vehicle_rental_2306203236_be.config.security.CurrentUser;
 import apap.ti._5.vehicle_rental_2306203236_be.model.RentalAddOn;
 import apap.ti._5.vehicle_rental_2306203236_be.model.RentalBooking;
+import apap.ti._5.vehicle_rental_2306203236_be.model.RentalVendor;
 import apap.ti._5.vehicle_rental_2306203236_be.model.Vehicle;
 import apap.ti._5.vehicle_rental_2306203236_be.repository.RentalAddOnRepository;
 import apap.ti._5.vehicle_rental_2306203236_be.repository.RentalBookingRepository;
 import apap.ti._5.vehicle_rental_2306203236_be.repository.VehicleRepository;
 import apap.ti._5.vehicle_rental_2306203236_be.restdto.request.rentalbooking.*;
 import apap.ti._5.vehicle_rental_2306203236_be.restdto.response.rentalbooking.RentalBookingResponseDTO;
+import apap.ti._5.vehicle_rental_2306203236_be.service.RentalVendorService;
 import apap.ti._5.vehicle_rental_2306203236_be.util.IdGenerator;
 import org.springframework.stereotype.Service;
 
@@ -22,17 +25,20 @@ public class RentalBookingRestServiceImpl implements RentalBookingRestService {
     private final RentalBookingRepository rentalBookingRepository;
     private final VehicleRepository vehicleRepository;
     private final RentalAddOnRepository rentalAddOnRepository;
+    private final RentalVendorService rentalVendorService;
     private final IdGenerator idGenerator;
 
     public RentalBookingRestServiceImpl(
             RentalBookingRepository rentalBookingRepository,
             VehicleRepository vehicleRepository,
             RentalAddOnRepository rentalAddOnRepository,
+            RentalVendorService rentalVendorService,
             IdGenerator idGenerator
     ) {
         this.rentalBookingRepository = rentalBookingRepository;
         this.vehicleRepository = vehicleRepository;
         this.rentalAddOnRepository = rentalAddOnRepository;
+        this.rentalVendorService = rentalVendorService;
         this.idGenerator = idGenerator;
     }
 
@@ -84,33 +90,118 @@ public class RentalBookingRestServiceImpl implements RentalBookingRestService {
 
     @Override
     public List<RentalBookingResponseDTO> getAllRentalBookings() {
-        return rentalBookingRepository.findAllByDeletedAtIsNullOrderByCreatedAtDesc()
-                .stream().map(this::convertToResponseDTO).toList();
+        String role = CurrentUser.getRole();
+        String email = CurrentUser.getEmail();
+        String userId = CurrentUser.getUserId();
+
+        List<RentalBooking> bookings;
+        
+        if ("ROLE_SUPERADMIN".equals(role)) {
+            // Superadmin sees all bookings
+            bookings = rentalBookingRepository.findAllByDeletedAtIsNullOrderByCreatedAtDesc();
+        } else if ("ROLE_RENTAL_VENDOR".equals(role)) {
+            // Rental vendor sees only their bookings
+            RentalVendor vendor = rentalVendorService.getOrCreateVendor(email);
+            bookings = rentalBookingRepository.findAllByVendorId(vendor.getId());
+        } else if ("ROLE_CUSTOMER".equals(role)) {
+            // Customer sees only their bookings
+            bookings = rentalBookingRepository.findAllByCustomerIdAndDeletedAtIsNullOrderByCreatedAtDesc(userId);
+        } else {
+            throw new IllegalArgumentException("Role tidak valid");
+        }
+        
+        return bookings.stream().map(this::convertToResponseDTO).toList();
     }
 
     @Override
     public List<RentalBookingResponseDTO> getAllRentalBookingsByKeyword(String keyword) {
+        String role = CurrentUser.getRole();
+        String email = CurrentUser.getEmail();
+        String userId = CurrentUser.getUserId();
+
         List<RentalBooking> bookings;
-        if (keyword == null || keyword.trim().isEmpty()) {
-            bookings = rentalBookingRepository.findAllByDeletedAtIsNullOrderByCreatedAtDesc();
+        
+        if ("ROLE_SUPERADMIN".equals(role)) {
+            // Superadmin sees all bookings with keyword
+            if (keyword == null || keyword.trim().isEmpty()) {
+                bookings = rentalBookingRepository.findAllByDeletedAtIsNullOrderByCreatedAtDesc();
+            } else {
+                bookings = rentalBookingRepository.findByIdContainingIgnoreCaseOrVehicle_IdContainingIgnoreCaseOrPickUpLocationContainingIgnoreCase(
+                        keyword.trim(), keyword.trim(), keyword.trim());
+            }
+        } else if ("ROLE_RENTAL_VENDOR".equals(role)) {
+            // Rental vendor sees only their bookings
+            RentalVendor vendor = rentalVendorService.getOrCreateVendor(email);
+            bookings = rentalBookingRepository.findAllByVendorId(vendor.getId());
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                String lowerKeyword = keyword.trim().toLowerCase();
+                bookings = bookings.stream()
+                    .filter(b -> b.getId().toLowerCase().contains(lowerKeyword) ||
+                                b.getVehicleId().toLowerCase().contains(lowerKeyword) ||
+                                b.getPickUpLocation().toLowerCase().contains(lowerKeyword))
+                    .collect(Collectors.toList());
+            }
+        } else if ("ROLE_CUSTOMER".equals(role)) {
+            // Customer sees only their bookings
+            bookings = rentalBookingRepository.findAllByCustomerIdAndDeletedAtIsNullOrderByCreatedAtDesc(userId);
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                String lowerKeyword = keyword.trim().toLowerCase();
+                bookings = bookings.stream()
+                    .filter(b -> b.getId().toLowerCase().contains(lowerKeyword) ||
+                                b.getVehicleId().toLowerCase().contains(lowerKeyword) ||
+                                b.getPickUpLocation().toLowerCase().contains(lowerKeyword))
+                    .collect(Collectors.toList());
+            }
         } else {
-            bookings = rentalBookingRepository.findByIdContainingIgnoreCaseOrVehicle_IdContainingIgnoreCaseOrPickUpLocationContainingIgnoreCase(
-                    keyword.trim(), keyword.trim(), keyword.trim());
+            throw new IllegalArgumentException("Role tidak valid");
         }
+        
         return bookings.stream().map(this::convertToResponseDTO).toList();
     }
 
     @Override
     public RentalBookingResponseDTO getRentalBooking(String id) {
-        RentalBooking booking = rentalBookingRepository.findByIdAndDeletedAtIsNull(id).orElse(null);
-        if (booking == null) throw new IllegalArgumentException("Booking tidak ditemukan");
+        String role = CurrentUser.getRole();
+        String email = CurrentUser.getEmail();
+        String userId = CurrentUser.getUserId();
+
+        RentalBooking booking;
+        
+        if ("ROLE_SUPERADMIN".equals(role)) {
+            // Superadmin can access any booking
+            booking = rentalBookingRepository.findByIdAndDeletedAtIsNull(id).orElse(null);
+        } else if ("ROLE_RENTAL_VENDOR".equals(role)) {
+            // Rental vendor can only access their bookings
+            RentalVendor vendor = rentalVendorService.getOrCreateVendor(email);
+            booking = rentalBookingRepository.findByIdAndVendorId(id, vendor.getId()).orElse(null);
+        } else if ("ROLE_CUSTOMER".equals(role)) {
+            // Customer can only access their bookings
+            booking = rentalBookingRepository.findByIdAndCustomerIdAndDeletedAtIsNull(id, userId).orElse(null);
+        } else {
+            throw new IllegalArgumentException("Role tidak valid");
+        }
+        
+        if (booking == null) throw new IllegalArgumentException("Booking tidak ditemukan atau Anda tidak memiliki akses");
         return convertToResponseDTO(booking);
     }
 
     @Override
     public RentalBookingResponseDTO updateRentalBookingDetails(UpdateRentalBookingRequestDTO dto) {
+        String role = CurrentUser.getRole();
+        String userId = CurrentUser.getUserId();
+
         RentalBooking booking = rentalBookingRepository.findByIdAndDeletedAtIsNull(dto.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Booking tidak ditemukan"));
+        
+        // Check ownership - only customer who owns the booking or superadmin can update
+        if ("ROLE_CUSTOMER".equals(role) && !booking.getCustomerId().equals(userId)) {
+            throw new IllegalArgumentException("Anda tidak memiliki akses untuk mengubah booking ini");
+        }
+        
+        if ("ROLE_RENTAL_VENDOR".equals(role)) {
+            throw new IllegalArgumentException("Rental vendor tidak dapat mengubah detail booking");
+        }
+        
         if (!"Upcoming".equals(booking.getStatus()))
             throw new IllegalStateException("Booking tidak bisa diubah, status bukan 'Upcoming'");
 
@@ -152,8 +243,20 @@ public class RentalBookingRestServiceImpl implements RentalBookingRestService {
 
     @Override
     public RentalBookingResponseDTO updateRentalBookingStatus(String id, String newStatus) {
+        String role = CurrentUser.getRole();
+        String email = CurrentUser.getEmail();
+
         RentalBooking booking = rentalBookingRepository.findByIdAndDeletedAtIsNull(id)
                 .orElseThrow(() -> new IllegalArgumentException("Booking tidak ditemukan"));
+        
+        // Check ownership - only vendor who owns the vehicle or superadmin can update status
+        if ("ROLE_RENTAL_VENDOR".equals(role)) {
+            RentalVendor vendor = rentalVendorService.getOrCreateVendor(email);
+            if (!booking.getVehicle().getRentalVendor().getId().equals(vendor.getId())) {
+                throw new IllegalArgumentException("Anda tidak memiliki akses untuk mengubah status booking ini");
+            }
+        }
+        
         Vehicle vehicle = booking.getVehicle();
         LocalDateTime now = LocalDateTime.now();
 
@@ -197,8 +300,17 @@ public class RentalBookingRestServiceImpl implements RentalBookingRestService {
 
     @Override
     public RentalBookingResponseDTO updateRentalBookingAddOn(UpdateRentalBookingAddOnRequestDTO dto){
+        String role = CurrentUser.getRole();
+        String userId = CurrentUser.getUserId();
+
         RentalBooking booking = rentalBookingRepository.findByIdAndDeletedAtIsNull(dto.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Booking tidak ditemukan"));
+        
+        // Check ownership - only customer who owns the booking or superadmin can update
+        if ("ROLE_CUSTOMER".equals(role) && !booking.getCustomerId().equals(userId)) {
+            throw new IllegalArgumentException("Anda tidak memiliki akses untuk mengubah booking ini");
+        }
+        
         if (!"Upcoming".equals(booking.getStatus()))
             throw new IllegalStateException("Add-ons hanya bisa diubah saat status Upcoming");
 
@@ -225,8 +337,21 @@ public class RentalBookingRestServiceImpl implements RentalBookingRestService {
 
     @Override
     public RentalBookingResponseDTO deleteRentalBooking(DeleteRentalBookingRequestDTO dto) {
+        String role = CurrentUser.getRole();
+        String userId = CurrentUser.getUserId();
+
         RentalBooking booking = rentalBookingRepository.findByIdAndDeletedAtIsNull(dto.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Booking tidak ditemukan"));
+        
+        // Check ownership - only customer who owns the booking or superadmin can delete
+        if ("ROLE_CUSTOMER".equals(role) && !booking.getCustomerId().equals(userId)) {
+            throw new IllegalArgumentException("Anda tidak memiliki akses untuk menghapus booking ini");
+        }
+        
+        if ("ROLE_RENTAL_VENDOR".equals(role)) {
+            throw new IllegalArgumentException("Rental vendor tidak dapat menghapus booking");
+        }
+        
         if (!"Upcoming".equals(booking.getStatus()))
             throw new IllegalStateException("Hanya booking Upcoming yang dapat dihapus");
 

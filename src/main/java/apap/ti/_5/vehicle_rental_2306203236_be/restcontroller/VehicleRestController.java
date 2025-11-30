@@ -57,7 +57,7 @@ public class VehicleRestController {
         }
     }
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('SUPERADMIN','RENTAL_VENDOR')")
+    @PreAuthorize("hasAnyRole('SUPERADMIN','RENTAL_VENDOR', 'CUSTOMER')")
     public ResponseEntity<BaseResponseDTO<VehicleResponseDTO>> getVehicle(@PathVariable("id") String id) {
         var baseResponse = new BaseResponseDTO<VehicleResponseDTO>();
 

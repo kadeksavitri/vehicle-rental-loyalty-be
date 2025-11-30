@@ -24,7 +24,7 @@ public class CorsConfig {
                     // For development allow all origins (use allowedOriginPatterns to permit credentials)
                     //.allowedOriginPatterns("*")
                     .allowedOrigins("http://localhost:5173", "http://localhost:8080", "http://2306203236-be.hafizmuh.site",
-                                "https://2306203236-fe.hafizmuh.site")
+                                "http://2306203236-fe.hafizmuh.site")
                     .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
                     .allowedHeaders("*")
                     .allowCredentials(true)

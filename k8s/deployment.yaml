@@ -62,4 +62,4 @@ spec:
                   name: vehiclerental-2306203236-be-secret
                   key: API_KEY
             - name: PROFILE_SERVICE_BASE_URL
-              value: "https://2306219575-be.hafizmuh.site"
+              value: "http://2306219575-be.hafizmuh.site"

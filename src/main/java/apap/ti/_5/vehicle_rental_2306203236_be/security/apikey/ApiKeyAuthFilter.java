@@ -19,9 +19,9 @@ import java.util.Collections;
 @Component
 public class ApiKeyAuthFilter extends OncePerRequestFilter {
 
-	@Value("${vehicle.api-key:test-api-key-dev}") //test
+	//@Value("${vehicle.api-key:test-api-key-dev}") //test
 	//@Value("${vehicle.api-key}")
-	//@Value("${API_KEY}")
+	@Value("${API_KEY}")
 	private String expectedApiKey;
 
 

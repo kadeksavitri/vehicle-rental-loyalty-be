@@ -24,6 +24,9 @@ public class RentalBooking {
     @Id
     private String id; 
 
+    @Column (name = "customer_id", nullable = false)
+    private String customerId;
+
     @Column (name = "id_vehicle", nullable = false)
     private String vehicleId;
 

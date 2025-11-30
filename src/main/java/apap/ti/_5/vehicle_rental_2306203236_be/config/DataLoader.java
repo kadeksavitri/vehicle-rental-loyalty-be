@@ -215,8 +215,12 @@ public class DataLoader implements CommandLineRunner {
             long days = java.time.Duration.between(pickUpTime, dropOffTime).toDays();
             double totalPrice = (vehicle.getPrice() * days) + addOnsPrice;
             
+            // Generate dummy customerId
+            String customerId = "CUST-" + String.format("%04d", (i % 20) + 1);
+            
             RentalBooking booking = RentalBooking.builder()
                 .id(bookingId)
+                .customerId(customerId)
                 .vehicle(vehicle)
                 .vehicleId(vehicle.getId())
                 .pickUpTime(pickUpTime)

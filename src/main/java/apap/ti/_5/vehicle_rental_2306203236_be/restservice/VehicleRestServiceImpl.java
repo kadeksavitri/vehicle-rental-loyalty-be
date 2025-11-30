@@ -6,12 +6,15 @@ import apap.ti._5.vehicle_rental_2306203236_be.repository.VehicleRepository;
 import apap.ti._5.vehicle_rental_2306203236_be.repository.RentalVendorRepository;
 import apap.ti._5.vehicle_rental_2306203236_be.repository.RentalBookingRepository;
 import apap.ti._5.vehicle_rental_2306203236_be.restdto.request.vehicle.AddVehicleRequestDTO;
+import apap.ti._5.vehicle_rental_2306203236_be.restdto.request.vehicle.SearchAvailableVehicleRequestDTO;
 import apap.ti._5.vehicle_rental_2306203236_be.restdto.request.vehicle.UpdateVehicleRequestDTO;
+import apap.ti._5.vehicle_rental_2306203236_be.restdto.response.vehicle.AvailableVehicleResponseDTO;
 import apap.ti._5.vehicle_rental_2306203236_be.restdto.response.vehicle.VehicleResponseDTO;
 import apap.ti._5.vehicle_rental_2306203236_be.util.IdGenerator;
 
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -183,6 +186,62 @@ public class VehicleRestServiceImpl implements VehicleRestService {
                 .fuelType(vehicle.getFuelType())
                 .price(vehicle.getPrice())
                 .status(vehicle.getStatus())
+                .createdAt(vehicle.getCreatedAt())
+                .build();
+    }
+
+    @Override
+    public List<AvailableVehicleResponseDTO> searchAvailableVehicles(SearchAvailableVehicleRequestDTO searchRequest) {
+        // Get all vehicles
+        List<Vehicle> allVehicles = vehicleRepository.findAll();
+
+        // Calculate days for the requested period
+        long days = Math.max(1, Duration.between(searchRequest.getPickUpTime(), searchRequest.getDropOffTime()).toDays());
+
+        // Filter and map vehicles
+        return allVehicles.stream()
+                .filter(vehicle -> {
+                    // Get vendor
+                    RentalVendor vendor = vehicle.getRentalVendor();
+                    
+                    // Check if vendor has both pickup and dropoff locations
+                    boolean vendorHasLocations = vendor != null 
+                            && vendor.getListOfLocations() != null 
+                            && vendor.getListOfLocations().contains(searchRequest.getPickUpLocation())
+                            && vendor.getListOfLocations().contains(searchRequest.getDropOffLocation());
+
+                    // Filter conditions
+                    return vehicle.getCapacity() >= searchRequest.getCapacityNeeded()
+                            && vehicle.getTransmission().equalsIgnoreCase(searchRequest.getTransmissionNeeded())
+                            && "Available".equals(vehicle.getStatus())
+                            && vehicle.getLocation().equals(searchRequest.getPickUpLocation())
+                            && vendorHasLocations;
+                })
+                .map(vehicle -> convertToAvailableVehicleResponseDTO(vehicle, days))
+                .collect(Collectors.toList());
+    }
+
+    private AvailableVehicleResponseDTO convertToAvailableVehicleResponseDTO(Vehicle vehicle, long days) {
+        String vendorName = vehicle.getRentalVendor() != null
+                ? vehicle.getRentalVendor().getName()
+                : "Unknown Vendor";
+
+        return AvailableVehicleResponseDTO.builder()
+                .id(vehicle.getId())
+                .rentalVendorId(vehicle.getRentalVendorId())
+                .rentalVendorName(vendorName)
+                .type(vehicle.getType())
+                .brand(vehicle.getBrand())
+                .model(vehicle.getModel())
+                .productionYear(vehicle.getProductionYear())
+                .location(vehicle.getLocation())
+                .licensePlate(vehicle.getLicensePlate())
+                .capacity(vehicle.getCapacity())
+                .transmission(vehicle.getTransmission())
+                .fuelType(vehicle.getFuelType())
+                .price(vehicle.getPrice())
+                .status(vehicle.getStatus())
+                .calculatedPrice(vehicle.getPrice() * days)
                 .createdAt(vehicle.getCreatedAt())
                 .build();
     }

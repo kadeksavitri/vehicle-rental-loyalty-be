@@ -61,6 +61,7 @@ public class RentalBookingRestServiceImpl implements RentalBookingRestService {
 
         RentalBooking booking = RentalBooking.builder()
             .id(newId)
+            .customerId(dto.getCustomerId())
             .vehicle(vehicle)
             .vehicleId(dto.getVehicleId())
             .pickUpTime(dto.getPickUpTime())
@@ -126,6 +127,7 @@ public class RentalBookingRestServiceImpl implements RentalBookingRestService {
         }
         booking.setListOfAddOns(addons);
 
+        booking.setCustomerId(dto.getCustomerId());
         booking.setVehicle(vehicle);
         booking.setVehicleId(dto.getVehicleId());
         booking.setPickUpLocation(dto.getPickUpLocation());
@@ -281,6 +283,7 @@ public class RentalBookingRestServiceImpl implements RentalBookingRestService {
 
         return RentalBookingResponseDTO.builder()
                 .id(booking.getId())
+                .customerId(booking.getCustomerId())
                 .vehicleId(booking.getVehicleId())
                 .vehicleBrand(booking.getVehicle() != null ? booking.getVehicle().getBrand() : "Unknown")
                 .vehicleType(booking.getVehicle() != null ? booking.getVehicle().getType() : "Unknown")

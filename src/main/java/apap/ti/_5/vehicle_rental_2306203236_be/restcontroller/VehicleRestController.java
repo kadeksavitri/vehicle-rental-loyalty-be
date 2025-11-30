@@ -1,8 +1,10 @@
 package apap.ti._5.vehicle_rental_2306203236_be.restcontroller;
 
 import apap.ti._5.vehicle_rental_2306203236_be.restdto.request.vehicle.AddVehicleRequestDTO;
+import apap.ti._5.vehicle_rental_2306203236_be.restdto.request.vehicle.SearchAvailableVehicleRequestDTO;
 import apap.ti._5.vehicle_rental_2306203236_be.restdto.request.vehicle.UpdateVehicleRequestDTO;
 import apap.ti._5.vehicle_rental_2306203236_be.restdto.response.BaseResponseDTO;
+import apap.ti._5.vehicle_rental_2306203236_be.restdto.response.vehicle.AvailableVehicleResponseDTO;
 import apap.ti._5.vehicle_rental_2306203236_be.restdto.response.vehicle.VehicleResponseDTO;
 import apap.ti._5.vehicle_rental_2306203236_be.restservice.VehicleRestService;
 import jakarta.validation.Valid;
@@ -207,6 +209,42 @@ public class VehicleRestController {
             baseResponse.setMessage("Tidak dapat menghapus kendaraan: " + e.getMessage());
             baseResponse.setTimestamp(new Date());
             return new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
+
+        } catch (Exception e) {
+            baseResponse.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            baseResponse.setMessage("Terjadi kesalahan server: " + e.getMessage());
+            baseResponse.setTimestamp(new Date());
+            return new ResponseEntity<>(baseResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping("/search")
+    @PreAuthorize("hasAnyRole('SUPERADMIN','CUSTOMER')")
+    public ResponseEntity<BaseResponseDTO<List<AvailableVehicleResponseDTO>>> searchAvailableVehicles(
+            @Valid @RequestBody SearchAvailableVehicleRequestDTO searchRequest,
+            BindingResult bindingResult) {
+
+        var baseResponse = new BaseResponseDTO<List<AvailableVehicleResponseDTO>>();
+
+        if (bindingResult.hasFieldErrors()) {
+            StringBuilder errors = new StringBuilder();
+            for (FieldError err : bindingResult.getFieldErrors()) {
+                errors.append(err.getDefaultMessage()).append("; ");
+            }
+            baseResponse.setStatus(HttpStatus.BAD_REQUEST.value());
+            baseResponse.setMessage(errors.toString());
+            baseResponse.setTimestamp(new Date());
+            return new ResponseEntity<>(baseResponse, HttpStatus.BAD_REQUEST);
+        }
+
+        try {
+            List<AvailableVehicleResponseDTO> availableVehicles = vehicleRestService.searchAvailableVehicles(searchRequest);
+
+            baseResponse.setStatus(HttpStatus.OK.value());
+            baseResponse.setData(availableVehicles);
+            baseResponse.setMessage("Pencarian kendaraan tersedia berhasil");
+            baseResponse.setTimestamp(new Date());
+            return new ResponseEntity<>(baseResponse, HttpStatus.OK);
 
         } catch (Exception e) {
             baseResponse.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());

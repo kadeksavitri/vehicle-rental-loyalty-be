@@ -295,9 +295,10 @@
 //                         rentalBooking.getListOfAddOns() != null ?
 //                         rentalBooking.getListOfAddOns().stream().map(RentalAddOn::getName).collect(Collectors.toList()) :
 //                         List.of()
-//                 )
+//                 ) 
 //                 .build();
 //     }
+
 
 //     // Mengecek kendaraan sedang dibooking di rentang waktu booking
 //     public boolean isVehicleAvailableDuringPeriod(Vehicle vehicle, LocalDateTime requestedPickUp, LocalDateTime requestedDropOff) {

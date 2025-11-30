@@ -5,12 +5,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
 @Configuration
-public class CorsConfig {
+public class CorsConfig implements WebMvcConfigurer{
 
-    @Value("${CORS_ALLOWED_ORIGINS}")
+    @Value("${cors.allowed.origins:http://localhost:5173,http://127.0.0.1:5173,http://2306219575-fe.hafizmuh.site,http://2306219575-be.hafizmuh.site,http://2306203236-be.hafizmuh.site,http://2306203236-fe.hafizmuh.site}")
     private String allowedOrigins;
-
 
     @Bean
     public WebMvcConfigurer corsConfigurer() {

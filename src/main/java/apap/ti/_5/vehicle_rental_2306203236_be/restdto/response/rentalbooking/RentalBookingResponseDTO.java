@@ -26,6 +26,7 @@ public class RentalBookingResponseDTO {
     private String transmissionNeeded;
     private boolean includeDriver;
     private String status;
+    private String billStatus;
     private Double totalPrice;
     private List<String> listOfAddOns; 
     private LocalDateTime createdAt;

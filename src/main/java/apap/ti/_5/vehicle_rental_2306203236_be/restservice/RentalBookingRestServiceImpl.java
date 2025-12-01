@@ -8,18 +8,24 @@ import apap.ti._5.vehicle_rental_2306203236_be.model.Vehicle;
 import apap.ti._5.vehicle_rental_2306203236_be.repository.RentalAddOnRepository;
 import apap.ti._5.vehicle_rental_2306203236_be.repository.RentalBookingRepository;
 import apap.ti._5.vehicle_rental_2306203236_be.repository.VehicleRepository;
+import apap.ti._5.vehicle_rental_2306203236_be.restdto.request.bill.CreateBillRequestDTO;
 import apap.ti._5.vehicle_rental_2306203236_be.restdto.request.rentalbooking.*;
+import apap.ti._5.vehicle_rental_2306203236_be.restdto.response.bill.BillResponseDTO;
 import apap.ti._5.vehicle_rental_2306203236_be.restdto.response.rentalbooking.RentalBookingResponseDTO;
+import apap.ti._5.vehicle_rental_2306203236_be.service.BillService;
 import apap.ti._5.vehicle_rental_2306203236_be.service.RentalVendorService;
 import apap.ti._5.vehicle_rental_2306203236_be.util.IdGenerator;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class RentalBookingRestServiceImpl implements RentalBookingRestService {
 
     private final RentalBookingRepository rentalBookingRepository;
@@ -27,19 +33,22 @@ public class RentalBookingRestServiceImpl implements RentalBookingRestService {
     private final RentalAddOnRepository rentalAddOnRepository;
     private final RentalVendorService rentalVendorService;
     private final IdGenerator idGenerator;
+    private final BillService billService;
 
     public RentalBookingRestServiceImpl(
             RentalBookingRepository rentalBookingRepository,
             VehicleRepository vehicleRepository,
             RentalAddOnRepository rentalAddOnRepository,
             RentalVendorService rentalVendorService,
-            IdGenerator idGenerator
+            IdGenerator idGenerator,
+            BillService billService
     ) {
         this.rentalBookingRepository = rentalBookingRepository;
         this.vehicleRepository = vehicleRepository;
         this.rentalAddOnRepository = rentalAddOnRepository;
         this.rentalVendorService = rentalVendorService;
         this.idGenerator = idGenerator;
+        this.billService = billService;
     }
 
     @Override
@@ -78,6 +87,7 @@ public class RentalBookingRestServiceImpl implements RentalBookingRestService {
             .transmissionNeeded(dto.getTransmissionNeeded())
             .includeDriver(dto.isIncludeDriver())
             .status("Upcoming")
+            .billStatus(RentalBooking.BillStatus.UNPAID)
             .totalPrice(totalPrice)  
             .listOfAddOns(addons)
             .createdAt(LocalDateTime.now())
@@ -85,6 +95,48 @@ public class RentalBookingRestServiceImpl implements RentalBookingRestService {
             .build();
 
         rentalBookingRepository.save(booking);
+        
+        // Create bill in bill service
+        try {
+            log.info("Creating bill for booking: {}", newId);
+            
+            CreateBillRequestDTO billRequest = CreateBillRequestDTO.builder()
+                .customerId(dto.getCustomerId())
+                .serviceName("Vehicle Rental")
+                .serviceReferenceId(newId)
+                .description("Vehicle Rental Booking - " + vehicle.getBrand() + " " + vehicle.getModel())
+                .amount(BigDecimal.valueOf(totalPrice))
+                .build();
+            
+            BillResponseDTO billResponse = billService.createBill(billRequest);
+            log.info("Bill created successfully: {}", billResponse.getId());
+            
+            // Fetch updated bill status
+            List<BillResponseDTO> customerBills = billService.getCustomerBills(dto.getCustomerId());
+            Optional<BillResponseDTO> currentBill = customerBills.stream()
+                .filter(bill -> newId.equals(bill.getServiceReferenceId()))
+                .findFirst();
+            
+            if (currentBill.isPresent()) {
+                String billStatus = currentBill.get().getStatus();
+                log.info("Bill status for booking {}: {}", newId, billStatus);
+                
+                // Update booking bill status
+                if ("PAID".equalsIgnoreCase(billStatus)) {
+                    booking.setBillStatus(RentalBooking.BillStatus.PAID);
+                } else {
+                    booking.setBillStatus(RentalBooking.BillStatus.UNPAID);
+                }
+                booking.setUpdatedAt(LocalDateTime.now());
+                rentalBookingRepository.save(booking);
+            }
+            
+        } catch (Exception e) {
+            log.error("Failed to create bill for booking {}: {}", newId, e.getMessage());
+            // Continue with booking creation even if bill creation fails
+            // Bill status remains UNPAID
+        }
+        
         return convertToResponseDTO(booking);
     }
 
@@ -420,6 +472,7 @@ public class RentalBookingRestServiceImpl implements RentalBookingRestService {
                 .transmissionNeeded(booking.getTransmissionNeeded())
                 .includeDriver(booking.isIncludeDriver())
                 .status(booking.getStatus())
+                .billStatus(booking.getBillStatus() != null ? booking.getBillStatus().name() : "UNPAID")
                 .totalPrice(booking.getTotalPrice())
                 .listOfAddOns(
                         booking.getListOfAddOns() != null ?

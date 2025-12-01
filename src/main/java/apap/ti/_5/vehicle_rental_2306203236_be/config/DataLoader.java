@@ -24,12 +24,14 @@ public class DataLoader implements CommandLineRunner {
     private final VehicleRepository vehicleRepository;
     private final RentalAddOnRepository rentalAddOnRepository;
     private final RentalBookingRepository rentalBookingRepository;
+    private final MaintenanceRecordRepository maintenanceRecordRepository;
 
     // Threshold untuk data dummy
     private static final int MIN_VENDORS = 3;
     private static final int MIN_VEHICLES_PER_VENDOR = 5;
     private static final int MIN_ADDONS = 5;
     private static final int MIN_BOOKINGS = 10;
+    private static final int MIN_MAINTENANCE_RECORDS = 8;
 
     @Override
     @Transactional
@@ -69,6 +71,14 @@ public class DataLoader implements CommandLineRunner {
             loadBookings(vehicles, addOns);
         } else {
             log.info("Bookings already populated. Skipping...");
+        }
+
+        // Load Maintenance Records
+        if (!vehicles.isEmpty() && !vendors.isEmpty() && maintenanceRecordRepository.count() < MIN_MAINTENANCE_RECORDS) {
+            log.info("Loading dummy maintenance records...");
+            loadMaintenanceRecords(vehicles, vendors);
+        } else {
+            log.info("Maintenance records already populated. Skipping...");
         }
 
         log.info("Data loader completed!");
@@ -217,6 +227,9 @@ public class DataLoader implements CommandLineRunner {
             // Generate dummy customerId
             String customerId = "CUST-" + String.format("%04d", (i % 20) + 1);
             
+            // Set bill status - some paid, some unpaid
+            RentalBooking.BillStatus billStatus = (i % 3 == 0) ? RentalBooking.BillStatus.PAID : RentalBooking.BillStatus.UNPAID;
+            
             RentalBooking booking = RentalBooking.builder()
                 .id(bookingId)
                 .customerId(customerId)
@@ -231,6 +244,7 @@ public class DataLoader implements CommandLineRunner {
                 .totalPrice(totalPrice)
                 .includeDriver(i % 2 == 0)
                 .status(statuses[i % 3])
+                .billStatus(billStatus)
                 .listOfAddOns(selectedAddOns)
                 .build();
 
@@ -255,5 +269,59 @@ public class DataLoader implements CommandLineRunner {
         }
 
         return basePrice;
+    }
+
+    private void loadMaintenanceRecords(List<Vehicle> vehicles, List<RentalVendor> vendors) {
+        List<MaintenanceRecord> maintenanceRecords = new ArrayList<>();
+
+        String[][] maintenanceData = {
+            // {description, vendorNote, status}
+            {"Engine oil change and filter replacement", "Regular maintenance scheduled", "Completed"},
+            {"Brake pad replacement", "Brake pads worn out", "Completed"},
+            {"Tire replacement and alignment", "All four tires replaced", "Ongoing"},
+            {"Air conditioning system check", "AC cooling issue resolved", "Completed"},
+            {"Transmission fluid change", "Scheduled maintenance", "Ongoing"},
+            {"Battery replacement", "Old battery not holding charge", "Completed"},
+            {"Suspension system repair", "Front suspension needed repair", "Ongoing"},
+            {"Engine diagnostics and tune-up", "Check engine light was on", "Completed"},
+            {"Windshield replacement", "Crack in windshield", "Ongoing"},
+            {"Exhaust system repair", "Exhaust leak fixed", "Completed"}
+        };
+
+        Long[] costs = {500000L, 750000L, 1200000L, 650000L, 800000L, 950000L, 1500000L, 1100000L, 2000000L, 900000L};
+
+        for (int i = 0; i < MIN_MAINTENANCE_RECORDS && i < vehicles.size(); i++) {
+            Vehicle vehicle = vehicles.get(i);
+            String[] data = maintenanceData[i % maintenanceData.length];
+            
+            String maintenanceId = String.format("MAINT%04d", i + 1);
+            
+            // Service date - some in past, some recent, some upcoming
+            LocalDateTime serviceDate = LocalDateTime.now().minusDays(10 - i).plusHours(i * 2);
+            
+            MaintenanceRecord record = MaintenanceRecord.builder()
+                .id(maintenanceId)
+                .vehicle(vehicle)
+                .vehicleId(vehicle.getId())
+                .rentalVendor(vehicle.getRentalVendor())
+                .rentalVendorId(vehicle.getRentalVendorId())
+                .serviceDate(serviceDate)
+                .description(data[0])
+                .cost(costs[i % costs.length])
+                .vendorNote(data[1])
+                .status(data[2])
+                .build();
+
+            maintenanceRecords.add(record);
+            
+            // Update vehicle status based on maintenance status
+            if ("Ongoing".equals(data[2])) {
+                vehicle.setStatus("In Maintenance");
+                vehicleRepository.save(vehicle);
+            }
+        }
+
+        maintenanceRecordRepository.saveAll(maintenanceRecords);
+        log.info("Loaded {} maintenance records", maintenanceRecords.size());
     }
 }

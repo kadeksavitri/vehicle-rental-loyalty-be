@@ -61,6 +61,10 @@ public class RentalBooking {
     @Column (name = "status", nullable = false)
     private String status; // Upcoming, Ongoing, Done
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "bill_status", nullable = false)
+    private BillStatus billStatus;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "booking_addon",
@@ -87,5 +91,10 @@ public class RentalBooking {
     @PreUpdate
     protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();
+    }
+
+    public enum BillStatus {
+        UNPAID,
+        PAID
     }
 }

@@ -7,10 +7,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-@Configuration
-public class CorsConfig implements WebMvcConfigurer{
+@Configuration //implements WebMvcConfigurer
+public class CorsConfig {
 
-    @Value("${cors.allowed.origins:http://localhost:5173,http://127.0.0.1:5173,http://2306219575-fe.hafizmuh.site,http://2306219575-be.hafizmuh.site,http://2306203236-be.hafizmuh.site,http://2306203236-fe.hafizmuh.site}")
+    @Value("${cors.allowed.origins:http://localhost:8080,http://localhost:5173,http://127.0.0.1:5173,http://2306219575-fe.hafizmuh.site,http://2306219575-be.hafizmuh.site,http://2306203236-be.hafizmuh.site,http://2306203236-fe.hafizmuh.site}")
     private String allowedOrigins;
 
     @Bean

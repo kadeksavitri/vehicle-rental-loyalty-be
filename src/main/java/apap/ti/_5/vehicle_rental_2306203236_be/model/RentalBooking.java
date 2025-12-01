@@ -89,4 +89,3 @@ public class RentalBooking {
         this.updatedAt = LocalDateTime.now();
     }
 }
-

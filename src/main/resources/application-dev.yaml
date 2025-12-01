@@ -21,6 +21,6 @@ profile:
 
 # Vehicle service API key for internal calls (from Bill Service)
 vehicle:
-   api-key: ${API_KEY_APAP}
+#    api-key: ${API_KEY_APAP}
 
-#   api-key: ${VEHICLE_API_KEY:test-api-key-dev} #test 
+   api-key: ${VEHICLE_API_KEY:test-api-key-dev} #test 

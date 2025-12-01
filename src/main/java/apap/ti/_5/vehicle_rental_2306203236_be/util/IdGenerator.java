@@ -14,4 +14,9 @@ public class IdGenerator {
         int lastNum = Integer.parseInt(lastId.substring(3));
         return String.format("VR%06d", lastNum + 1);
     }
+    public String generateMaintenanceRecordId(String lastId) {
+        if (lastId == null || lastId.isEmpty()) return "MAINT0001";
+        int lastNum = Integer.parseInt(lastId.substring(5));
+        return String.format("MAINT%04d", lastNum + 1);
+    }
 }
